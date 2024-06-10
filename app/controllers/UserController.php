@@ -5,7 +5,7 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 class UserController extends User implements IApiUsable
 {
-  private static $VALID_ROLES = array(1, 2, 3, 4);
+  public static $VALID_AREA = array(1, 2, 3, 4);
 
   /**
    * Gets the body of the request and inserts a new User in the db.
@@ -19,7 +19,7 @@ class UserController extends User implements IApiUsable
       $password = $params['password'];
       $role = $params['role'];
 
-      if (!in_array($role, self::$VALID_ROLES)) {
+      if (!in_array($role, self::$VALID_AREA)) {
         throw new Exception;
       } else {
         $user = new User();
@@ -61,7 +61,7 @@ class UserController extends User implements IApiUsable
   {
     try {
       $list = User::GetAllUsers();
-      $payload = json_encode(array("Users List:" => $list));
+      $payload = json_encode(array("Users:" => $list));
     } catch (Exception $ex) {
       $payload = json_encode(array("Message:" => 'Error trying to get all users'));
     }

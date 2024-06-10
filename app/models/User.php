@@ -11,7 +11,6 @@ class User
 
     public $updated_at;
 
-
     /**
      * Inserts a new user in the database.
      */

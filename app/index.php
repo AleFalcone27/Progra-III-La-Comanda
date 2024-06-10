@@ -13,9 +13,8 @@ use Slim\Routing\RouteContext;
 require __DIR__ . '/../vendor/autoload.php';
 
 require_once './db/DataAccess.php';
-// require_once './middlewares/Logger.php';
-
 require_once './controllers/UserController.php';
+require_once './controllers/ProductController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -38,6 +37,18 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->put('/mod', \UserController::class . ':ModifyOne');
     $group->post('/delete',\UserController::class . ':DeleteOne');
   });
+
+
+$app->group('/productos', function(RouteCollectorProxy $group){
+  $group->get('/', \ProductController::class . ':GetAll');
+  $group->get('/{name}', \ProductController::class . ':GetOne');
+  $group->post('/', \ProductController::class . ':AddOne');
+  $group->put('/mod', \ProductController::class . ':ModifyOne');
+  $group->post('/delete',\ProductController::class . ':DeleteOne');
+});
+
+
+
 
 $app->get('[/funciona]', function (Request $request, Response $response) {    
     $payload = json_encode(array("mensaje" => "Slim Framework 4 PHP"));
