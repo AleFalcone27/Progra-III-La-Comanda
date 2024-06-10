@@ -12,10 +12,10 @@ use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once './db/AccesoDatos.php';
+require_once './db/DataAccess.php';
 // require_once './middlewares/Logger.php';
 
-require_once './controllers/UsuarioController.php';
+require_once './controllers/UserController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -32,14 +32,15 @@ $app->addBodyParsingMiddleware();
 
 // Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
-    $group->get('/{usuario}', \UsuarioController::class . ':TraerUno');
-    $group->post('[/]', \UsuarioController::class . ':CargarUno');
+    $group->get('/', \UserController::class . ':GetAll');
+    $group->get('/{name}', \UserController::class . ':GetOne');
+    $group->post('/', \UserController::class . ':AddOne');
+    $group->put('/mod', \UserController::class . ':ModifyOne');
+    $group->post('/delete',\UserController::class . ':DeleteOne');
   });
 
-$app->get('[/]', function (Request $request, Response $response) {    
+$app->get('[/funciona]', function (Request $request, Response $response) {    
     $payload = json_encode(array("mensaje" => "Slim Framework 4 PHP"));
-    
     $response->getBody()->write($payload);
     return $response->withHeader('Content-Type', 'application/json');
 });
