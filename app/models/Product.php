@@ -58,7 +58,7 @@ class Product
     public static function ModifyProduct($product)
     {
         $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery('UPDATE users SET name = :name, price = :price, preparation_area = :preparation_area, updated_at = :updated_at  WHERE id = :id');
+        $query = $objDataAccess->PrepQuery('UPDATE products SET name = :name, price = :price, preparation_area = :preparation_area, updated_at = :updated_at  WHERE id = :id');
         $query->bindValue(':id', $product->id, PDO::PARAM_INT);
         $query->bindValue(':name', $product->name, PDO::PARAM_STR);
         $query->bindValue(':price', $product->price);
@@ -67,6 +67,21 @@ class Product
         $query->execute();
     }
 
+    /**
+     * Changes the products´s status by their ID from the database. 
+     * @param int $id from the product to be deleted. 
+     */
+    public static function DeleteProduct($id)
+    {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("UPDATE users SET status = :status, updated_at = :updated_at  WHERE id = :id");
+        $date = new DateTime();
+        $formated_date = $date->format('Y-m-d H:i:s');
+        $query->bindValue(':id', $id, PDO::PARAM_INT);
+        $query->bindValue(':updated_at', $formated_date);
+        $query->bindValue(':status', 0, PDO::PARAM_INT);
+        $query->execute();
+    }
 
 
 

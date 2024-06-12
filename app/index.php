@@ -44,7 +44,7 @@ $app->group('/productos', function(RouteCollectorProxy $group){
   $group->get('/{name}', \ProductController::class . ':GetOne');
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
-  $group->post('/delete',\ProductController::class . ':DeleteOne');
+  $group->put('/delete',\ProductController::class . ':DeleteOne');
 });
 
 

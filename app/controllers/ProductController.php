@@ -95,28 +95,28 @@ class ProductController extends Product implements IApiUsable
 
             $payload = json_encode(array("Message" => "Product successfully modified"));
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to modify roduct ". $ex->getMessage()));
+            $payload = json_encode(array("Message" => "Error atempting to modify product ". $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
-     * Gets the body  from de request and changes the user´s status by their ID from the database.
+     * Gets the body  from de request and changes the products´s status by their ID from the database.
      * @return response 
      */
     public function DeleteOne($request, $response, $args)
     {
         try {
-            $params = $request->getParsedBody();
-            $user_id = $params['id'];
+            $query_params = $request->getQueryParams();
+            $id = $query_params['id'];
 
-            User::DeleteUser($user_id);
+            Product::DeleteProduct($id);
 
-            $payload = json_encode(array("message" => "User deleted succesfully"));
+            $payload = json_encode(array("message" => "Product deleted succesfully"));
         } catch (Exception $ex) {
 
-            $payload = json_encode(array("message" => "Error atempting to delete user ". $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to delete product ". $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
