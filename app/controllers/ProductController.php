@@ -5,7 +5,6 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 class ProductController extends Product implements IApiUsable
 {
-
     /**
      * Gets the body of the request and inserts a new Product in the db.
      * @return response 
@@ -47,7 +46,6 @@ class ProductController extends Product implements IApiUsable
         $user = $args['name'];
         $usuario = User::GetOneUser($user);
         $payload = json_encode($usuario);
-
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
