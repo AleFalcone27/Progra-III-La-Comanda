@@ -62,7 +62,7 @@ class TableController extends Table implements IApiUsable
     }
 
     /**
-     * Gets the query paarams from de request and modifies a table by their ID from the database.
+     * Gets the query params from de request and modifies a table by their ID from the database.
      * @return response 
      */
     public function ModifyOne($request, $response, $args)
@@ -71,15 +71,15 @@ class TableController extends Table implements IApiUsable
             $query_params = $request->getQueryParams();
 
             $id = $query_params['id'];
-            $hex_code = $query_params['hex_code'];
             $customer_count = $query_params['customer_count'];
+            $hex_code = $query_params['hex_code'];
             $status = $query_params['status'];
 
             $table = new Table();
             $table->id = $id;
-            $table->name = $hex_code;
-            $table->price = $customer_count;
-            $table->preparation_area = $status;
+            $table->hex_code = $hex_code;
+            $table->customer_count = $customer_count;
+            $table->status = $status;
 
             Table::ModifyTable($table);
 
@@ -92,7 +92,7 @@ class TableController extends Table implements IApiUsable
     }
 
     /**
-     * Gets the body from de request and changes the products´s status by their ID from the database.
+     * Gets the body from de request and changes the table´s status by their ID from the database.
      * @return response 
      */
     public function DeleteOne($request, $response, $args)
@@ -111,5 +111,4 @@ class TableController extends Table implements IApiUsable
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
-
 }

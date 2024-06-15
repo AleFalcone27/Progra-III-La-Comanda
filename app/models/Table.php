@@ -62,9 +62,13 @@ class Table
         $query->execute();
     }
 
-    public static function DeleteTable($table)
+    public static function DeleteTable($id)
     {
-
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery('UPDATE tables SET status = :status WHERE id = :id');
+        $query->bindValue(':status', 0, PDO::PARAM_INT);
+        $query->bindValue(':id', $id, PDO::PARAM_INT);
+        $query->execute();
     }
 
 }

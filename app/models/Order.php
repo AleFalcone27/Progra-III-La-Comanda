@@ -31,9 +31,6 @@ class Order
         $objDataAccess = DataAccess::GetInstance();
         // $query = $objDataAccess->PrepQuery("INSERT INTO order (product_id, table_hex_code, hex_code, prep_by, status, estimated_prep_time, actual_prep_time) VALUES
             //(:product_id, :table_hex_code, :hex_code, :prep_by, :status, :estimated_prep_time, :actual_prep_time)");
-
-                
-
         // $query->bindValue(':name', $this->name, PDO::PARAM_STR);
         // $query->bindValue(':price', $this->price);
         // $query->bindValue(':preparation_area', $this->preparation_area);
