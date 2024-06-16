@@ -4,18 +4,14 @@ use Symfony\Component\Console\Event\ConsoleCommandEvent;
 class Order
 {
     public $id;
-
-    public $hex_code;
-
     public $table_hex_code;
-    public $estimated_prep_time;
-
-    public $status;
-
+    public $hex_code;
     public $date;
-
+    public $status;
+    public $estimated_prep_time;
     public $actual_prep_time;
 
+    // me falta agregar la funcionalidad de la foto cuando se toma una orden
 
     /**
      * Inserts a new order in the database.
@@ -62,8 +58,6 @@ class Order
         $query->bindValue(':status', $this->status, PDO::PARAM_INT);
         $query->execute();
     }
-
-// (table_hex_code, hex_code, date, status, estimated_prep_time, actual_prep_time) VALUES (:table_hex_code, :hex_code, :status, :date , :estimated_prep_time, :actual_prep_time)");
 
 
     /**

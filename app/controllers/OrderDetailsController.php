@@ -1,35 +1,36 @@
 <?php
-require_once './models/Order.php';
-require_once 'Controllers/OrderDetailsController.php';
+require_once './models/OrderDetails.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class OrderController extends Product implements IApiUsable
+class OrderDetailsController extends OrderDetails 
 {
     /**
-     * Gets the body of the request and inserts a new Order in the db.
+     * Gets the body of the request and inserts the order Details in the db.
      * @return response 
      */
-    public function AddOne($request, $response, $args)
+    public static function AddDetails($request, $response, $args)
     {
-        try {
+        try {    
             $params = $request->getParsedBody();
-            $hex_code = $params['hex_code'];
-            $table_hex_code = $params['table_hex_code'];
-            $estimated_prep_time = $params['estimated_prep_time'];
+            $order_hex_code = $params['hex_code'];
+            $details = $params['order_details'];
 
-            $order = new Order();
-            $order->hex_code = $hex_code;
-            $order->table_hex_code = $table_hex_code;
-            $order->estimated_prep_time = $estimated_prep_time;
-            $order->AddOrder();
+            $order_details = new OrderDetails();
+            $order_details->order_hex_code = $order_hex_code;
 
-            OrderDetailsController::AddDetails($request,$response,$args);
+            foreach ($details as $detail) {
+                foreach ($detail as $product_id => $quantity) {
+                    $order_details->product_id = $product_id;
+                    $order_details->quantity = $quantity;
+                    $order_details->AddOrderDetails();
+                }
+            }
 
-            $payload = json_encode(array("Message" => "Order created Sucessfully"));
+            $payload = json_encode(array("Message" => "Order details created Sucessfully"));
 
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to create new Order " . $ex->getMessage()));
+            $payload = json_encode(array("Message" => "Error atempting to add details to an order " . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
