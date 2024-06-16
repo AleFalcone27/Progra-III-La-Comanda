@@ -14,6 +14,7 @@ require_once './db/DataAccess.php';
 require_once './controllers/UserController.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
+require_once './controllers/OrderController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -55,6 +56,13 @@ $app->group('/mesas', function(RouteCollectorProxy $group){
   $group->put('/delete',\TableController::class . ':DeleteOne');
 });
 
+// Order Routes
+$app->group('/orden', function(RouteCollectorProxy $group){
+  $group->get('/', \OrderController::class . ':GetAll');
+  $group->post('/', \OrderController::class . ':AddOne');
+  $group->put('/update',\OrderController::class . ':UpdateStatus');
+  $group->put('/mod', \OrderController::class . ':ModifyOne');
+});
 
 
 $app->get('[/funciona]', function (Request $request, Response $response) {    

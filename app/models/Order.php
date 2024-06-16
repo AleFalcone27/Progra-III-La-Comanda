@@ -3,22 +3,16 @@ use Symfony\Component\Console\Event\ConsoleCommandEvent;
 
 class Order
 {
-
     public $id;
-
-    public $product_id;
-
-    public $table_hex_code;
 
     public $hex_code;
 
-    public $prep_by;
+    public $table_hex_code;
+    public $estimated_prep_time;
 
     public $status;
 
     public $date;
-
-    public $estimated_prep_time;
 
     public $actual_prep_time;
 
@@ -29,65 +23,65 @@ class Order
     public function AddOrder()
     {
         $objDataAccess = DataAccess::GetInstance();
-        // $query = $objDataAccess->PrepQuery("INSERT INTO order (product_id, table_hex_code, hex_code, prep_by, status, estimated_prep_time, actual_prep_time) VALUES
-            //(:product_id, :table_hex_code, :hex_code, :prep_by, :status, :estimated_prep_time, :actual_prep_time)");
-        // $query->bindValue(':name', $this->name, PDO::PARAM_STR);
-        // $query->bindValue(':price', $this->price);
-        // $query->bindValue(':preparation_area', $this->preparation_area);
-        // $query->bindValue(':status', 1, PDO::PARAM_INT);
-        // $query->bindValue(':created_at', $formatted_date);
-        // $query->bindValue(':updated_at', $formatted_date);
+        $query = $objDataAccess->PrepQuery("INSERT INTO orders (table_hex_code, hex_code, date, status, estimated_prep_time, actual_prep_time) VALUES (:table_hex_code, :hex_code, :status, :date , :estimated_prep_time, :actual_prep_time)");
 
-        // $query->execute();
+        $date = new DateTime();
+        $formated_date = $date->format('Y-m-d H:i:s');
+        $query->bindValue(':table_hex_code', $this->table_hex_code, PDO::PARAM_STR);
+        $query->bindValue(':hex_code', $this->hex_code, PDO::PARAM_STR);
+        $query->bindValue(':date', $formated_date);
+        $query->bindValue(':status', 1, PDO::PARAM_INT);
+        $query->bindValue(':estimated_prep_time', $this->estimated_prep_time);
+        $query->bindValue(':actual_prep_time', null);
+
+        $query->execute();
     }
 
     /**
-     * Gets all the products from the database.
+     * Gets all the orders from the database.
      * @return array returns an array containing all of the remaining rows in the result set.
      */
-    // public static function GetAllProducts()
-    // {
-    //     $objDataAccess = DataAccess::GetInstance();
-    //     $query = $objDataAccess->PrepQuery("SELECT * FROM products");
-    //     $query->execute();
-    //     return $query->fetchAll(PDO::FETCH_CLASS, 'Product');
-    // }
+    public static function GetAllOrdes()
+    {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT * FROM orders");
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_CLASS, 'Order');
+    }
+
+    /**
+     * Changes the orders´s status by their hex_code from the database. 
+     * @param int $id from the order to be deleted. 
+     */
+    public function UpdateStatus()
+    {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("UPDATE orders SET status = :status, WHERE hex_code = :hex_code");
+        $date = new DateTime();
+        $query->bindValue(':hex_code', $this->hex_code, PDO::PARAM_STR);
+        $query->bindValue(':status', $this->status, PDO::PARAM_INT);
+        $query->execute();
+    }
+
+// (table_hex_code, hex_code, date, status, estimated_prep_time, actual_prep_time) VALUES (:table_hex_code, :hex_code, :status, :date , :estimated_prep_time, :actual_prep_time)");
 
 
     /**
-     * Modifies a product by their ID from the database.
-     * @param Product $product instance of user with the id to modify.
+     * Modifies an order by their ID from the database.
+     * @param Order $order instance of user with the id to modify.
      */
-    // public static function ModifyProduct($product)
-    // {
-    //     $objDataAccess = DataAccess::GetInstance();
-    //     $query = $objDataAccess->PrepQuery('UPDATE products SET name = :name, price = :price, preparation_area = :preparation_area, updated_at = :updated_at  WHERE id = :id');
-    //     $query->bindValue(':id', $product->id, PDO::PARAM_INT);
-    //     $query->bindValue(':name', $product->name, PDO::PARAM_STR);
-    //     $query->bindValue(':price', $product->price);
-    //     $query->bindValue(':preparation_area', $product->preparation_area, PDO::PARAM_INT);
-    //     $query->bindValue(':updated_at', $product->updated_at);
-    //     $query->execute();
-    // }
-
-    /**
-     * Changes the products´s status by their ID from the database. 
-     * @param int $id from the product to be deleted. 
-     */
-    // public static function DeleteProduct($id)
-    // {
-    //     $objDataAccess = DataAccess::GetInstance();
-    //     $query = $objDataAccess->PrepQuery("UPDATE users SET status = :status, updated_at = :updated_at  WHERE id = :id");
-    //     $date = new DateTime();
-    //     $formated_date = $date->format('Y-m-d H:i:s');
-    //     $query->bindValue(':id', $id, PDO::PARAM_INT);
-    //     $query->bindValue(':updated_at', $formated_date);
-    //     $query->bindValue(':status', 0, PDO::PARAM_INT);
-    //     $query->execute();
-    // }
-
-
-
-
+    public static function ModifyOrder($order)
+    {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery('UPDATE orders SET hex_code = :hex_code, table_hex_code = :table_hex_code, date = :date, status = :status, estimated_prep_time = :estimated_prep_time, actual_prep_time = :actual_prep_time  WHERE id = :id');
+        $query->bindValue(':id', $order->id, PDO::PARAM_INT);
+        $query->bindValue(':hex_code', $order->hex_code);
+        $query->bindValue(':table_hex_code', $order->table_hex_code);
+        $query->bindValue(':status', $order->status, PDO::PARAM_INT);
+        $query->bindValue(':date', $order->date);
+        $query->bindValue(':estimated_prep_time', $order->estimated_prep_time);
+        $query->bindValue(':actual_prep_time', $order->actual_prep_time);
+        $query->execute();
+    }
 
 }
