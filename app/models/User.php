@@ -56,6 +56,15 @@ class User
         return $query->fetchObject('user');
     }
 
+    public static function GetUserRoleById($user_id){
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT role FROM users WHERE id = :id");
+        $query->bindValue(':id', $user_id, PDO::PARAM_INT);
+        $query->execute();
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        return $result['role'];
+    }
+
 
     /**
      * Modifies a user by their ID from the database.

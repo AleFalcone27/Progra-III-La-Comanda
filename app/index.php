@@ -15,6 +15,7 @@ require_once './controllers/UserController.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
 require_once './controllers/OrderController.php';
+require_once './controllers/OrderDetailsController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -62,13 +63,10 @@ $app->group('/orden', function(RouteCollectorProxy $group){
   $group->post('/', \OrderController::class . ':AddOne');
   $group->put('/update',\OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
+  $group->put('/start',\OrderDetailsController::class . ':StartPrepping');
+  $group->put('/end',\OrderDetailsController::class . ':EndPrepping');
+  $group->put('/serve',\OrderDetailsController::class . ':Serve');
 });
 
-
-$app->get('[/funciona]', function (Request $request, Response $response) {    
-    $payload = json_encode(array("mensaje" => "Slim Framework 4 PHP"));
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
-});
 
 $app->run();

@@ -37,15 +37,15 @@ class OrderController extends Product implements IApiUsable
 
 
     /**
-     * Gets the requests args and gets an order by their ID from the database.
+     * Gets the requests args and gets an order by their hex_code from the database.
      * @return response 
      */
     public function GetOne($request, $response, $args)
     {
         // Buscamos usuario por nombre
-        $user = $args['name'];
-        $usuario = User::GetOneUser($user);
-        $payload = json_encode($usuario);
+        $hex_code = $args['hex_code'];
+        $order = Order::GetOrder($hex_code);
+        $payload = json_encode($order);
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }

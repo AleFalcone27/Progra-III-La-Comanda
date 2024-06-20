@@ -84,7 +84,15 @@ class Product
     }
 
 
-
-
-
+    public static function GetPreparationArea($order_hex_code) {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT p.preparation_area FROM products p JOIN order_details od ON p.id = od.product_id WHERE od.order_hex_code = :order_hex_code
+        ");
+        $query->bindValue(':order_hex_code', $order_hex_code, PDO::PARAM_STR);
+        $query->execute();
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        
+        $preparation_area = array_column($results, 'preparation_area');
+        return $preparation_area;
+    }
 }

@@ -59,6 +59,14 @@ class Order
         $query->execute();
     }
 
+    public static function GetOrder($hex_code){
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT * FROM orders where hex_code = :hex_code");
+        $query->bindParam(":hex_code", $hex_code);
+        $query->execute();
+        return $query->fetch(PDO::FETCH_ASSOC);
+    }
+
 
     /**
      * Modifies an order by their ID from the database.
