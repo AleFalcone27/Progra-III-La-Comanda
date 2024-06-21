@@ -11,7 +11,7 @@ class AuthMiddleware{
         }
         else{
             $response = new Response();
-            $response->getBody()->write('Error: Debes iniciar iniciar sesion');
+            $response->getBody()->write(json_encode(array("Error" => "Debes iniciar iniciar sesion")));
         }
         return $response;
     }
