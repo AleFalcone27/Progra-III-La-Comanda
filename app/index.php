@@ -17,6 +17,8 @@ require_once './controllers/TableController.php';
 require_once './controllers/OrderController.php';
 require_once './controllers/OrderDetailsController.php';
 
+require_once './middlewares/AuthMiddleware.php';
+
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
@@ -24,51 +26,53 @@ $dotenv->safeLoad();
 // Instantiate App
 $app = AppFactory::create();
 
-// Add error middleware
+// Add middlwares
 $app->addErrorMiddleware(true, true, true);
-
-// Add parse body
 $app->addBodyParsingMiddleware();
+
+
+// Auth Routes
+$app->group('/', function (RouteCollectorProxy $group) {
+  $group->post('login', \UserController::class . ':LogIn');
+  $group->post('logout', \UserController::class . ':LogOut');
+});
 
 // User Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
   $group->get('/', \UserController::class . ':GetAll');
   $group->get('/{name}', \UserController::class . ':GetOne');
-  $group->post('/login', \UserController::class . ':LogIn');
-  $group->post('/logout', \UserController::class . ':LogOut');
   $group->post('/', \UserController::class . ':AddOne');
-  $group->post('/delete',\UserController::class . ':DeleteOne');
+  $group->post('/delete', \UserController::class . ':DeleteOne');
   $group->put('/mod', \UserController::class . ':ModifyOne');
-  });
+})->add(new AuthMiddleware());
 
 // Products Routes
-$app->group('/productos', function(RouteCollectorProxy $group){
+$app->group('/productos', function (RouteCollectorProxy $group) {
   $group->get('/', \ProductController::class . ':GetAll');
   $group->get('/{name}', \ProductController::class . ':GetOne');
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
-  $group->put('/delete',\ProductController::class . ':DeleteOne');
-});
+  $group->put('/delete', \ProductController::class . ':DeleteOne');
+})->add(new AuthMiddleware());;
 
 // Table Routes
-$app->group('/mesas', function(RouteCollectorProxy $group){
+$app->group('/mesas', function (RouteCollectorProxy $group) {
   $group->get('/', \TableController::class . ':GetAll');
   $group->get('/{hex_code}', \TableController::class . ':GetOne');
   $group->post('/', \TableController::class . ':AddOne');
   $group->put('/mod', \TableController::class . ':ModifyOne');
-  $group->put('/delete',\TableController::class . ':DeleteOne');
-});
+  $group->put('/delete', \TableController::class . ':DeleteOne');
+})->add(new AuthMiddleware());;
 
 // Order Routes
-$app->group('/orden', function(RouteCollectorProxy $group){
+$app->group('/orden', function (RouteCollectorProxy $group) {
   $group->get('/', \OrderController::class . ':GetAll');
   $group->post('/', \OrderController::class . ':AddOne');
-  $group->put('/update',\OrderController::class . ':UpdateStatus');
+  $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
-  $group->put('/start',\OrderDetailsController::class . ':StartPrepping');
-  $group->put('/end',\OrderDetailsController::class . ':EndPrepping');
-  $group->put('/serve',\OrderDetailsController::class . ':Serve');
-});
-
+  $group->put('/start', \OrderDetailsController::class . ':StartPrepping');
+  $group->put('/end', \OrderDetailsController::class . ':EndPrepping');
+  $group->put('/serve', \OrderDetailsController::class . ':Serve');
+})->add(new AuthMiddleware());;
 
 $app->run();
