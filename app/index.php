@@ -18,6 +18,10 @@ require_once './controllers/OrderController.php';
 require_once './controllers/OrderDetailsController.php';
 
 require_once './middlewares/AuthMiddleware.php';
+require_once './middlewares/RoleMiddleware.php';
+
+// Iniciamos la Session
+session_start();
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -29,7 +33,6 @@ $app = AppFactory::create();
 // Add middlwares
 $app->addErrorMiddleware(true, true, true);
 $app->addBodyParsingMiddleware();
-
 
 // Auth Routes
 $app->group('/', function (RouteCollectorProxy $group) {
@@ -44,7 +47,9 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   $group->post('/', \UserController::class . ':AddOne');
   $group->post('/delete', \UserController::class . ':DeleteOne');
   $group->put('/mod', \UserController::class . ':ModifyOne');
-})->add(new AuthMiddleware());
+})->add(new RoleMiddleware(1))
+->add(new AuthMiddleware());
+
 
 // Products Routes
 $app->group('/productos', function (RouteCollectorProxy $group) {
@@ -53,7 +58,9 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
   $group->put('/delete', \ProductController::class . ':DeleteOne');
-})->add(new AuthMiddleware());;
+})->add(new RoleMiddleware(1))
+->add(new AuthMiddleware());
+
 
 // Table Routes
 $app->group('/mesas', function (RouteCollectorProxy $group) {
@@ -62,7 +69,8 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
   $group->post('/', \TableController::class . ':AddOne');
   $group->put('/mod', \TableController::class . ':ModifyOne');
   $group->put('/delete', \TableController::class . ':DeleteOne');
-})->add(new AuthMiddleware());;
+})->add(new RoleMiddleware(1,2))
+->add(new AuthMiddleware());
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
@@ -73,6 +81,7 @@ $app->group('/orden', function (RouteCollectorProxy $group) {
   $group->put('/start', \OrderDetailsController::class . ':StartPrepping');
   $group->put('/end', \OrderDetailsController::class . ':EndPrepping');
   $group->put('/serve', \OrderDetailsController::class . ':Serve');
-})->add(new AuthMiddleware());;
+})->add(new RoleMiddleware(1,2,3,4,5))
+->add(new AuthMiddleware());
 
 $app->run();
