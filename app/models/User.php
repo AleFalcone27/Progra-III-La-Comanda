@@ -108,9 +108,9 @@ class User
         $user = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($user_pass, $user['password'])) {
+            session_start();
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
-            var_dump($_SESSION);
         }
     }
 }
