@@ -97,4 +97,20 @@ class User
         $query->bindValue(':status', 0, PDO::PARAM_INT);
         $query->execute();
     }
+
+    public static function UserLogIn($user_name,$user_pass){
+
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT * FROM users WHERE name = :user_name AND status = :status");
+        $query->bindValue(':user_name', $user_name);
+        $query->bindValue(':status', 1, PDO::PARAM_INT);
+        $query->execute();
+        $user = $query->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($user_pass, $user['password'])) {
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_role'] = $user['role'];
+            var_dump($_SESSION);
+        }
+    }
 }

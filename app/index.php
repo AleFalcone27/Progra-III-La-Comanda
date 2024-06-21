@@ -32,11 +32,13 @@ $app->addBodyParsingMiddleware();
 
 // User Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('/', \UserController::class . ':GetAll');
-    $group->get('/{name}', \UserController::class . ':GetOne');
-    $group->post('/', \UserController::class . ':AddOne');
-    $group->put('/mod', \UserController::class . ':ModifyOne');
-    $group->post('/delete',\UserController::class . ':DeleteOne');
+  $group->get('/', \UserController::class . ':GetAll');
+  $group->get('/{name}', \UserController::class . ':GetOne');
+  $group->post('/login', \UserController::class . ':LogIn');
+  $group->post('/logout', \UserController::class . ':LogOut');
+  $group->post('/', \UserController::class . ':AddOne');
+  $group->post('/delete',\UserController::class . ':DeleteOne');
+  $group->put('/mod', \UserController::class . ':ModifyOne');
   });
 
 // Products Routes

@@ -111,7 +111,7 @@ class UserController extends User implements IApiUsable
     try {
       $params = $request->getParsedBody();
       $user_id = $params['id'];
-      
+
       User::DeleteUser($user_id);
 
       $payload = json_encode(array("message" => "User deleted succesfully"));
@@ -122,4 +122,42 @@ class UserController extends User implements IApiUsable
     $response->getBody()->write($payload);
     return $response->withHeader('Content-Type', 'application/json');
   }
+
+  public function LogIn($request, $response, $args)
+  {
+    try {
+
+      $params = (array) $request->getParsedBody();
+
+      if (!isset($params['user_name']) || !isset($params['user_pass'])) {
+        throw new Exception("Username or password not provided");
+      }
+
+      $user_name = $params['user_name'];
+      $user_pass = $params['user_pass'];
+
+      User::UserLogIn($user_name, $user_pass);
+
+      $payload = json_encode(array("message" => "User LogedIn succesfully"));
+    } catch (Exception $ex) {
+
+      $payload = json_encode(array("message" => "Error atempting to LogIn user"));
+    }
+    $response->getBody()->write($payload);
+    return $response->withHeader('Content-Type', 'application/json');
+  }
+
+  public function LogOut($request, $response, $args)
+  {
+    try {
+      session_unset();
+      $payload = json_encode(array("message" => "LogedOut succesfully"));
+    } catch (Exception $ex) {
+
+      $payload = json_encode(array("message" => "Error atempting to LogOut user"));
+    }
+    $response->getBody()->write($payload);
+    return $response->withHeader('Content-Type', 'application/json');
+  }
+
 }
