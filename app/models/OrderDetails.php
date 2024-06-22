@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 class OrderDetails {
     public $order_hex_code;
     public $product_id;

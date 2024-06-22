@@ -120,4 +120,14 @@ class ProductController extends Product implements IApiUsable
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public static function ProductExistsById($product_id){
+        try{
+            if(Product::GetProductById($product_id)){
+                return true;
+            }else return false; 
+        }
+        catch (Exception $ex){
+        }
+        
+    }
 }

@@ -19,6 +19,7 @@ require_once './controllers/OrderDetailsController.php';
 
 require_once './middlewares/AuthMiddleware.php';
 require_once './middlewares/RoleMiddleware.php';
+require_once './middlewares/ProductExistsMiddleware.php';
 
 // Iniciamos la Session
 session_start();
@@ -82,6 +83,7 @@ $app->group('/orden', function (RouteCollectorProxy $group) {
   $group->put('/end', \OrderDetailsController::class . ':EndPrepping');
   $group->put('/serve', \OrderDetailsController::class . ':Serve');
 })->add(new RoleMiddleware(1,2,3,4,5))
+->add(new ProductexistsMiddleware())
 ->add(new AuthMiddleware());
 
 $app->run();

@@ -1,5 +1,6 @@
 <?php
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 class Product
 {
@@ -94,5 +95,14 @@ class Product
         
         $preparation_area = array_column($results, 'preparation_area');
         return $preparation_area;
+    }
+
+    public static function GetProductById($product_id){
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT * FROM products WHERE id = :id AND status = :status");
+        $query->bindValue(':id', $product_id, PDO::PARAM_INT);
+        $query->bindValue(':status', 1, PDO::PARAM_INT);
+        $query->execute();
+        return $query->fetch(PDO::FETCH_ASSOC);
     }
 }
