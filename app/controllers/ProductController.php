@@ -120,6 +120,23 @@ class ProductController extends Product implements IApiUsable
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public function PopulateByCSV($request, $response, $args){
+
+        try{
+            $args = $request->getParsedBody();
+            $file_name = $args['file_name'];
+
+            Product::Populate($file_name);
+
+            $payload = json_encode(array("message" => "Table Products populated "));
+        }
+        catch (Exception $ex){
+            $payload = json_encode(array("message" => "Error atempting to populate Products table ". $ex->getMessage()));
+        }
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public static function ProductExistsById($product_id){
         try{
             if(Product::GetProductById($product_id)){
@@ -128,6 +145,5 @@ class ProductController extends Product implements IApiUsable
         }
         catch (Exception $ex){
         }
-        
     }
 }

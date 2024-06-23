@@ -1,5 +1,6 @@
 <?php
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 class Product
@@ -85,24 +86,55 @@ class Product
     }
 
 
-    public static function GetPreparationArea($order_hex_code) {
+    public static function GetPreparationArea($order_hex_code)
+    {
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT p.preparation_area FROM products p JOIN order_details od ON p.id = od.product_id WHERE od.order_hex_code = :order_hex_code
         ");
         $query->bindValue(':order_hex_code', $order_hex_code, PDO::PARAM_STR);
         $query->execute();
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $preparation_area = array_column($results, 'preparation_area');
         return $preparation_area;
     }
 
-    public static function GetProductById($product_id){
+    public static function GetProductById($product_id)
+    {
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT * FROM products WHERE id = :id AND status = :status");
         $query->bindValue(':id', $product_id, PDO::PARAM_INT);
         $query->bindValue(':status', 1, PDO::PARAM_INT);
         $query->execute();
         return $query->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function Populate($file_name)
+    {
+        try {
+            $path = '../app/UploadedProducts/';
+
+            $full_path = $path . $file_name;
+
+            $csv = fopen($full_path, 'r');
+
+            if ($csv === false) {
+                throw new Exception("No se pudo abrir el archivo CSV.");
+            }
+
+            while (($row = fgetcsv($csv)) !== false) {
+                $p = new Product();
+                $p->name = $row[0];
+                $p->price = $row[1];
+                $p->preparation_area = $row[2];
+                $p->AddProduct();
+            }
+
+            fclose($csv); 
+
+        } catch (Exception $ex) {
+            echo "Error: " . $ex->getMessage();
+        }
+
     }
 }
