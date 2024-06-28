@@ -126,7 +126,6 @@ class UserController extends User implements IApiUsable
   public function LogIn($request, $response, $args)
   {
     try {
-
       $params = (array) $request->getParsedBody();
 
       if (!isset($params['user_name']) || !isset($params['user_pass'])) {

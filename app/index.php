@@ -21,6 +21,8 @@ require_once './middlewares/AuthMiddleware.php';
 require_once './middlewares/RoleMiddleware.php';
 require_once './middlewares/ProductExistsMiddleware.php';
 require_once './middlewares/UploadedFilesMiddleware.php';
+require_once './middlewares/LoginMiddleware.php';
+require_once './utils/JwtAuth.php';
 
 // Iniciamos la Session
 session_start();
@@ -36,10 +38,9 @@ $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
 $app->addBodyParsingMiddleware();
 
-
 // Auth Routes
 $app->group('/', function (RouteCollectorProxy $group) {
-  $group->post('login', \UserController::class . ':LogIn');
+  $group->post('login', \UserController::class . ':LogIn')->add(new LoginMiddleware());
   $group->post('logout', \UserController::class . ':LogOut');
 });
 
@@ -64,7 +65,7 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
   ->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
   $group->post('/crearproductos', \ProductController::class . ':PopulateByCSV');
 })
-->add(new RoleMiddleware(1))
+->add(new RoleMiddleware(1,4))
 ->add(new AuthMiddleware());
 
 // Table Routes
@@ -89,5 +90,10 @@ $app->group('/orden', function (RouteCollectorProxy $group) {
 })->add(new RoleMiddleware(1,2,3,4,5))
 ->add(new ProductexistsMiddleware())
 ->add(new AuthMiddleware());
+
+
+$app->group('/jwt', function (RouteCollectorProxy $group) {
+  
+});
 
 $app->run();
