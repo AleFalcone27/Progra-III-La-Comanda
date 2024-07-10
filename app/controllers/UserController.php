@@ -123,27 +123,25 @@ class UserController extends User implements IApiUsable
     return $response->withHeader('Content-Type', 'application/json');
   }
 
-  public function LogIn($request, $response, $args)
+  public function UserLogIn($request, $response, $args)
   {
-    try {
       $params = (array) $request->getParsedBody();
-
       if (!isset($params['user_name']) || !isset($params['user_pass'])) {
         throw new Exception("Username or password not provided");
       }
-
       $user_name = $params['user_name'];
       $user_pass = $params['user_pass'];
+      $result = User::LogIn($user_name, $user_pass);
+      if ($result) {
+        $payload = json_encode(array("jwt" => $result));
+      } else {
+        $payload = json_encode(array("message" => "Wrong Credentials"));
+      }
 
-      User::UserLogIn($user_name, $user_pass);
+      $response->getBody()->write($payload);
+      return $response->withHeader('Content-Type', 'application/json');
 
-      $payload = json_encode(array("message" => "User LogedIn succesfully"));
-    } catch (Exception $ex) {
-
-      $payload = json_encode(array("message" => "Error atempting to LogIn user"));
-    }
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
+   
   }
 
   public function LogOut($request, $response, $args)
@@ -158,5 +156,4 @@ class UserController extends User implements IApiUsable
     $response->getBody()->write($payload);
     return $response->withHeader('Content-Type', 'application/json');
   }
-
 }

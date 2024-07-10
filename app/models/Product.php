@@ -112,7 +112,7 @@ class Product
     public static function Populate($file_name)
     {
         try {
-            $path = '../app/UploadedProducts/';
+            $path = '../app/Products/';
 
             $full_path = $path . $file_name;
 
@@ -130,11 +130,59 @@ class Product
                 $p->AddProduct();
             }
 
-            fclose($csv); 
+            fclose($csv);
 
         } catch (Exception $ex) {
             echo "Error: " . $ex->getMessage();
         }
+    }
+
+    public static function GetByCSV()
+    {
+
+        $products = self::GetAllProducts();
+
+        $path = '../app/Products/DonwloadedProducts.CSV';
+
+        $file = fopen($path,'w');
+
+        $headers = ['id', 'name', 'price','preparation_area','status','created_at','updated_at']; 
+        fputcsv($file, $headers);
+    
+        foreach ($products as $product) {
+            $line = [
+                $product->id,
+                $product->name,
+                $product->price,
+                $product->preparation_area,
+                $product->status,
+                $product->created_at,
+                $product->updated_at,
+            ];
+            fputcsv($file, $line);
+        }
+    
+        
+        if (file_exists($file)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($file));
+
+            ob_clean();
+            flush();
+            readfile($file);
+            fclose($file);
+            exit;
+        } else {
+            echo 'File not found.';
+        }
+
+
 
     }
+
 }

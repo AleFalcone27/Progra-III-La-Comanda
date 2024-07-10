@@ -1,0 +1,43 @@
+id,name,price,preparation_area,status,created_at,updated_at
+2,"Gin Tonic",5500,2,1,2024-06-17,2024-06-17
+3,"Milanesa de Carne",9000,3,1,2024-06-10,2024-06-14
+4,Pizza,10000,1,1,2024-06-17,2024-06-17
+6,"Hamburguesa de Garbanzos",8500,1,1,2024-06-23,2024-06-23
+7,"Pollo a la plancha",7000,1,1,2024-06-23,2024-06-23
+8,"Cerveza Roja",3500,3,1,2024-06-23,2024-06-23
+9,"Copa de vino tinto",2500,3,1,2024-06-23,2024-06-23
+10,"Cheescake de Maracuya",5000,4,1,2024-06-23,2024-06-23
+11,Chocotorta,5000,4,1,2024-06-23,2024-06-23
+12,"Cheescake de Frutos rojos",5000,4,1,2024-06-23,2024-06-23
+13,"Cerveza Rubia",3500,3,1,2024-06-23,2024-06-23
+14,"Hamburguesa de carne vacuna",9500,1,1,2024-06-23,2024-06-23
+15,"Porcion de papas fritas",6500,1,1,2024-06-23,2024-06-23
+17,"Pollo a la plancha",7000,1,1,2024-06-23,2024-06-23
+18,"Cerveza Roja",3500,3,1,2024-06-23,2024-06-23
+19,"Copa de vino tinto",2500,3,1,2024-06-23,2024-06-23
+20,"Cheescake de Maracuya",5000,4,1,2024-06-23,2024-06-23
+21,Chocotorta,5000,4,1,2024-06-23,2024-06-23
+22,"Cheescake de Frutos rojos",5000,4,1,2024-06-23,2024-06-23
+23,"Cerveza Rubia",3500,3,1,2024-06-23,2024-06-23
+24,"Hamburguesa de carne vacuna",9500,1,1,2024-06-23,2024-06-23
+25,"Porcion de papas fritas",6500,1,1,2024-06-23,2024-06-23
+26,"Hamburguesa de Garbanzos",8500,1,1,2024-06-23,2024-06-23
+27,"Pollo a la plancha",7000,1,1,2024-06-23,2024-06-23
+28,"Cerveza Roja",3500,3,1,2024-06-23,2024-06-23
+29,"Copa de vino tinto",2500,3,1,2024-06-23,2024-06-23
+30,"Cheescake de Maracuya",5000,4,1,2024-06-23,2024-06-23
+31,Chocotorta,5000,4,1,2024-06-23,2024-06-23
+32,"Cheescake de Frutos rojos",5000,4,1,2024-06-23,2024-06-23
+33,"Cerveza Rubia",3500,3,1,2024-06-23,2024-06-23
+34,"Hamburguesa de carne vacuna",9500,1,1,2024-06-23,2024-06-23
+35,"Porcion de papas fritas",6500,1,1,2024-06-23,2024-06-23
+36,"Hamburguesa de Garbanzos",8500,1,1,2024-06-23,2024-06-23
+37,"Pollo a la plancha",7000,1,1,2024-06-23,2024-06-23
+38,"Cerveza Roja",3500,3,1,2024-06-23,2024-06-23
+39,"Copa de vino tinto",2500,3,1,2024-06-23,2024-06-23
+40,"Cheescake de Maracuya",5000,4,1,2024-06-23,2024-06-23
+41,Chocotorta,5000,4,1,2024-06-23,2024-06-23
+42,"Cheescake de Frutos rojos",5000,4,1,2024-06-23,2024-06-23
+43,"Cerveza Rubia",3500,3,1,2024-06-23,2024-06-23
+44,"Hamburguesa de carne vacuna",9500,1,1,2024-06-23,2024-06-23
+45,"Porcion de papas fritas",6500,1,1,2024-06-23,2024-06-23

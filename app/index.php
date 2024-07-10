@@ -18,11 +18,33 @@ require_once './controllers/OrderController.php';
 require_once './controllers/OrderDetailsController.php';
 
 require_once './middlewares/AuthMiddleware.php';
-require_once './middlewares/RoleMiddleware.php';
 require_once './middlewares/ProductExistsMiddleware.php';
 require_once './middlewares/UploadedFilesMiddleware.php';
-require_once './middlewares/LoginMiddleware.php';
 require_once './utils/JwtAuth.php';
+
+/* 
+Order
+Cantidad de productos
+prep_by?
+
+Producto
+Tiempo estimado de preparacion 
+tipo
+
+La tabla de ordenes solo debe tener 1 orden y despues los distinto pedidos que pertenecen a esta deberian estar en una tabla intermedia con todos los pedidos
+Tengo que hacer una tablan intermedia con las ordenes separadas 
+
+- Guardar el id o el rol en el JWT
+
+- El codigod e la orden se debe crear y no pasarla por postman
+
+- Devolver solo un json en las response
+- Arreglar json token
+- Solamente arrancar a cocinar las 
+- Generar el hex de la orden antes de insertarla y no tomarla por postman 
+- La tabla orden no debe tener estado  
+
+*/
 
 // Iniciamos la Session
 session_start();
@@ -40,23 +62,23 @@ $app->addBodyParsingMiddleware();
 
 // Auth Routes
 $app->group('/', function (RouteCollectorProxy $group) {
-  $group->post('login', \UserController::class . ':LogIn')->add(new LoginMiddleware());
+  $group->post('login', \UserController::class . ':UserLogIn');
   $group->post('logout', \UserController::class . ':LogOut');
 });
 
 // User Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
+  $group->post('/', \UserController::class . ':AddOne');
   $group->get('/', \UserController::class . ':GetAll');
   $group->get('/{name}', \UserController::class . ':GetOne');
-  $group->post('/', \UserController::class . ':AddOne');
   $group->post('/delete', \UserController::class . ':DeleteOne');
   $group->put('/mod', \UserController::class . ':ModifyOne');
-})->add(new RoleMiddleware(1))
-->add(new AuthMiddleware());
+})->add(new AuthMiddleware(1));
+
 
 // Products Routes
 $app->group('/productos', function (RouteCollectorProxy $group) {
-  $group->get('/', \ProductController::class . ':GetAll');
+  $group->get('/all', \ProductController::class . ':GetAll');
   $group->get('/{name}', \ProductController::class . ':GetOne');
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
@@ -64,9 +86,8 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
   $group->post('/cargarcsv', \ProductController::class)
   ->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
   $group->post('/crearproductos', \ProductController::class . ':PopulateByCSV');
-})
-->add(new RoleMiddleware(1,4))
-->add(new AuthMiddleware());
+  $group->get('/obtenerproductos/todos', \ProductController::class . ':GetProductsCSV');
+})->add(new AuthMiddleware(1));
 
 // Table Routes
 $app->group('/mesas', function (RouteCollectorProxy $group) {
@@ -75,21 +96,19 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
   $group->post('/', \TableController::class . ':AddOne');
   $group->put('/mod', \TableController::class . ':ModifyOne');
   $group->put('/delete', \TableController::class . ':DeleteOne');
-})->add(new RoleMiddleware(1,2))
-->add(new AuthMiddleware());
+})->add(new AuthMiddleware(1,2))
+;
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
   $group->get('/', \OrderController::class . ':GetAll');
-  $group->post('/', \OrderController::class . ':AddOne');
+  $group->post('/', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
   $group->put('/start', \OrderDetailsController::class . ':StartPrepping');
   $group->put('/end', \OrderDetailsController::class . ':EndPrepping');
   $group->put('/serve', \OrderDetailsController::class . ':Serve');
-})->add(new RoleMiddleware(1,2,3,4,5))
-->add(new ProductexistsMiddleware())
-->add(new AuthMiddleware());
+})->add(new AuthMiddleware(1,2,3,4,5));
 
 
 $app->group('/jwt', function (RouteCollectorProxy $group) {

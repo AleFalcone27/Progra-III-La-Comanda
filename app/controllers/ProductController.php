@@ -146,4 +146,18 @@ class ProductController extends Product implements IApiUsable
         catch (Exception $ex){
         }
     }
+
+    public static function GetProductsCSV($request, $response, $args){
+        try{
+
+            Product::GetByCSV();
+
+            $payload = json_encode(array("message" => "File Created Succesfully"));
+        }
+        catch (Exception $ex){
+            $payload = json_encode(array("message" => "Unable to get products from database ". $ex->getMessage()));
+        }
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }

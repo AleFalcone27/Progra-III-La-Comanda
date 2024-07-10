@@ -98,7 +98,7 @@ class User
         $query->execute();
     }
 
-    public static function UserLogIn($user_name,$user_pass){
+    public static function LogIn($user_name,$user_pass){
 
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT * FROM users WHERE name = :user_name AND status = :status");
@@ -108,9 +108,7 @@ class User
         $user = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($user_pass, $user['password'])) {
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_role'] = $user['role'];
-            return;
+            return JwtAuth::CrearToken([$user['name'],$user['role']]);
         }
         throw new Exception('Credenciales Incorrectas');
     }

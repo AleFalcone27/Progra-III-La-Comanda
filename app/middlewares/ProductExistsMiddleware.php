@@ -17,6 +17,7 @@ class ProductexistsMiddleware{
             foreach ($products as $product) {
                 if(!ProductController::ProductExistsById(array_values($product)[0])){
                     $response = new Response();
+                    echo 'a';
                     $response->getBody()->write(json_encode(array("Error" => "El producto seleccionado no existe o no hay stock")));
                     return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
                 }

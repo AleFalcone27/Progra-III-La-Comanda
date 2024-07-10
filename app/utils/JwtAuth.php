@@ -5,40 +5,38 @@ use Firebase\JWT\Key;
 
 class JwtAuth
 {
-    private static $claveSecreta = 'Ale123';
-    private static $tipoEncriptacion = 'HS256';
+    private static $secret_key = 'AleFalcone';
+    private static $enc_type = 'HS256';
 
-    public static function CrearToken($datos)
+    public static function CrearToken($data)
     {
-        echo '2';
         $ahora = time();
         $payload = array(
             'iat' => $ahora,
-            'exp' => $ahora + (60000),
+            'exp' => $ahora + (30000),
             'aud' => self::Aud(),
-            'data' => $datos,
-            'app' => "Test JWT"
+            'data' => $data,
         );
-        return JWT::encode($payload, self::$claveSecreta, self::$tipoEncriptacion);
+        return JWT::encode($payload, self::$secret_key, self::$enc_type);
     }
 
     public static function VerificarToken($token)
     {
         if (empty($token)) {
-            throw new Exception("El token esta vacio.");
+            throw new Exception("The Token is empty");
         }
         try {
             $headers = new stdClass();
-            $decodificado = JWT::decode(
+            $decodificado = JWT::decode (
                 $token,
-                new Key(self::$claveSecreta, 'HS256'),
+                new Key(self::$secret_key, 'HS256'),
                 $headers
             );
         } catch (Exception $e) {
             throw $e;
         }
         if ($decodificado->aud !== self::Aud()) {
-            throw new Exception("No es el usuario valido");
+            throw new Exception("The user is not a valid one");
         }
     }
 
@@ -46,12 +44,12 @@ class JwtAuth
     public static function ObtenerPayLoad($token)
     {
         if (empty($token)) {
-            throw new Exception("El token esta vacio.");
+            throw new Exception("The TOKEN Is missing.");
         }
         return JWT::decode(
             $token,
-            self::$claveSecreta,
-            self::$tipoEncriptacion
+            self::$secret_key,
+            self::$enc_type
         );
     }
 
@@ -59,8 +57,7 @@ class JwtAuth
     {
         return JWT::decode(
             $token,
-            self::$claveSecreta,
-            self::$tipoEncriptacion
+            new Key(self::$secret_key, 'HS256')
         )->data;
     }
 

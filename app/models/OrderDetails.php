@@ -46,7 +46,7 @@ class OrderDetails {
         $orderDetails = OrderDetails::GetOrderDetails($order_hex_code);
     
         foreach ($orderDetails as $orderDetail) {
-            $product_id = $orderDetail['product_id'];
+            $product_id = $orderDetail["product_id"];
             $product_prep_area = $prep_areas[$product_id];
     
             if ($product_prep_area == $user_role) {
