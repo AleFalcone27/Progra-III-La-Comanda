@@ -1,5 +1,8 @@
 <?php
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use function Symfony\Component\Clock\now;
+
+require_once 'utils/functions.php';
 
 class Order
 {
@@ -18,17 +21,14 @@ class Order
      */
     public function AddOrder()
     {
-        $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery("INSERT INTO orders (table_hex_code, hex_code, date, status, estimated_prep_time, actual_prep_time) VALUES (:table_hex_code, :hex_code, :status, :date , :estimated_prep_time, :actual_prep_time)");
-
         $date = new DateTime();
         $formated_date = $date->format('Y-m-d H:i:s');
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("INSERT INTO orders (hex_code, table_hex_code, status, date) VALUES (:hex_code, :table_hex_code, :status, :date)");
         $query->bindValue(':table_hex_code', $this->table_hex_code, PDO::PARAM_STR);
         $query->bindValue(':hex_code', $this->hex_code, PDO::PARAM_STR);
         $query->bindValue(':date', $formated_date);
-        $query->bindValue(':status', 1, PDO::PARAM_INT);
-        $query->bindValue(':estimated_prep_time', $this->estimated_prep_time);
-        $query->bindValue(':actual_prep_time', null);
+        $query->bindValue(':status', 0, PDO::PARAM_INT);
 
         $query->execute();
     }
@@ -37,12 +37,16 @@ class Order
      * Gets all the orders from the database.
      * @return array returns an array containing all of the remaining rows in the result set.
      */
-    public static function GetAllOrdes()
+    public static function GetOrdersToPrepare($user_role)
     {
         $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery("SELECT * FROM orders");
+        $query = $objDataAccess->PrepQuery("SELECT product_id,name,order_hex_code FROM order_details
+        JOIN products ON product_id = products.id
+        WHERE order_details.status = 0 AND products.preparation_area = :user_role
+        ");
+        $query->bindValue(':user_role', $user_role);
         $query->execute();
-        return $query->fetchAll(PDO::FETCH_CLASS, 'Order');
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -59,7 +63,8 @@ class Order
         $query->execute();
     }
 
-    public static function GetOrder($hex_code){
+    public static function GetOrder($hex_code)
+    {
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT * FROM orders where hex_code = :hex_code");
         $query->bindParam(":hex_code", $hex_code);
@@ -75,15 +80,39 @@ class Order
     public static function ModifyOrder($order)
     {
         $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery('UPDATE orders SET hex_code = :hex_code, table_hex_code = :table_hex_code, date = :date, status = :status, estimated_prep_time = :estimated_prep_time, actual_prep_time = :actual_prep_time  WHERE id = :id');
+        $query = $objDataAccess->PrepQuery('UPDATE orders SET hex_code = :hex_code, table_hex_code = :table_hex_code, date = :date, status = :status,  WHERE id = :id');
         $query->bindValue(':id', $order->id, PDO::PARAM_INT);
         $query->bindValue(':hex_code', $order->hex_code);
         $query->bindValue(':table_hex_code', $order->table_hex_code);
         $query->bindValue(':status', $order->status, PDO::PARAM_INT);
         $query->bindValue(':date', $order->date);
-        $query->bindValue(':estimated_prep_time', $order->estimated_prep_time);
-        $query->bindValue(':actual_prep_time', $order->actual_prep_time);
         $query->execute();
+    }
+
+
+    public static function ToCSVFile($location){
+        try{
+            $data_access_obj = DataAccess::GetInstance();
+            $query = $data_access_obj->prepQuery("SELECT * FROM orders");
+            $query->execute();
+            $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rows)) {
+            throw new Exception('The table is empty or does not exists' );
+        }
+        $file = fopen($location, 'w');
+        fwrite($file, implode(',', array_keys($rows[0])) . "\n");
+        foreach ($rows as $row) {
+            $escapedRow = array_map(function($field) {
+                return str_replace(['"', "'"], '', $field);
+            }, $row);
+            fwrite($file, implode(',', $escapedRow) . "\n");
+        }
+        fclose($file);
+        return true;
+    } catch (Exception $e) {
+        echo $e;
+        return false;
+    }
     }
 
 }

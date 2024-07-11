@@ -5,7 +5,7 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 class UserController extends User implements IApiUsable
 {
-  public static $VALID_AREA = array(1, 2, 3, 4);
+  public static $VALID_AREA = array(1, 2, 3, 4, 5, 6);
 
   /**
    * Gets the body of the request and inserts a new User in the db.
@@ -140,8 +140,6 @@ class UserController extends User implements IApiUsable
 
       $response->getBody()->write($payload);
       return $response->withHeader('Content-Type', 'application/json');
-
-   
   }
 
   public function LogOut($request, $response, $args)

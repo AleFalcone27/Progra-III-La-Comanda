@@ -23,26 +23,14 @@ require_once './middlewares/UploadedFilesMiddleware.php';
 require_once './utils/JwtAuth.php';
 
 /* 
-Order
-Cantidad de productos
 prep_by?
 
-Producto
 Tiempo estimado de preparacion 
 tipo
 
-La tabla de ordenes solo debe tener 1 orden y despues los distinto pedidos que pertenecen a esta deberian estar en una tabla intermedia con todos los pedidos
-Tengo que hacer una tablan intermedia con las ordenes separadas 
-
-- Guardar el id o el rol en el JWT
-
-- El codigod e la orden se debe crear y no pasarla por postman
-
-- Devolver solo un json en las response
-- Arreglar json token
-- Solamente arrancar a cocinar las 
-- Generar el hex de la orden antes de insertarla y no tomarla por postman 
-- La tabla orden no debe tener estado  
+- Cuando el mozo carga la orden debe tener tiempo de demora??
+- Tener listos los puntos de correccion paso a paso 
+- Ver temas de cambio de estados
 
 */
 
@@ -64,11 +52,11 @@ $app->addBodyParsingMiddleware();
 $app->group('/', function (RouteCollectorProxy $group) {
   $group->post('login', \UserController::class . ':UserLogIn');
   $group->post('logout', \UserController::class . ':LogOut');
+  $group->post('register', \UserController::class . ':AddOne');
 });
 
 // User Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
-  $group->post('/', \UserController::class . ':AddOne');
   $group->get('/', \UserController::class . ':GetAll');
   $group->get('/{name}', \UserController::class . ':GetOne');
   $group->post('/delete', \UserController::class . ':DeleteOne');
@@ -83,8 +71,7 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
   $group->put('/delete', \ProductController::class . ':DeleteOne');
-  $group->post('/cargarcsv', \ProductController::class)
-  ->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
+  $group->post('/cargarcsv', \ProductController::class)->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
   $group->post('/crearproductos', \ProductController::class . ':PopulateByCSV');
   $group->get('/obtenerproductos/todos', \ProductController::class . ':GetProductsCSV');
 })->add(new AuthMiddleware(1));
@@ -96,23 +83,22 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
   $group->post('/', \TableController::class . ':AddOne');
   $group->put('/mod', \TableController::class . ':ModifyOne');
   $group->put('/delete', \TableController::class . ':DeleteOne');
-})->add(new AuthMiddleware(1,2))
-;
+})->add(new AuthMiddleware(1,2));
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
-  $group->get('/', \OrderController::class . ':GetAll');
+  $group->get('/', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,2));
   $group->post('/', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
-  $group->put('/start', \OrderDetailsController::class . ':StartPrepping');
-  $group->put('/end', \OrderDetailsController::class . ':EndPrepping');
-  $group->put('/serve', \OrderDetailsController::class . ':Serve');
-})->add(new AuthMiddleware(1,2,3,4,5));
-
-
-$app->group('/jwt', function (RouteCollectorProxy $group) {
-  
+  $group->put('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3));
+  $group->put('/end', \OrderDetailsController::class . ':EndPrepping')->add(new AuthMiddleware(1,3));
+  $group->get('/ReadyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
+  $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
+  $group->post('/saveImage', \OrderController::class . ':SaveOrderImage')->add(new AuthMiddleware(1,2));
+  $group->get('/descargar', \OrderController::class . ':GetCSVFile')->add(new AuthMiddleware(1));
 });
+
+
 
 $app->run();

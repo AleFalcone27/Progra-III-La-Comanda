@@ -14,12 +14,15 @@ class ProductexistsMiddleware{
 
             $products = $params['order_details'];
 
+
             foreach ($products as $product) {
-                if(!ProductController::ProductExistsById(array_values($product)[0])){
-                    $response = new Response();
-                    echo 'a';
-                    $response->getBody()->write(json_encode(array("Error" => "El producto seleccionado no existe o no hay stock")));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+                foreach ($product as $id => $quantity) {
+                    if(ProductController::ProductExistsById($id)){
+                        echo $id . '/n';
+                        $response = new Response();
+                        $response->getBody()->write(json_encode(array("Error" => "Alguno de los productos seleccionados no existen")));
+                        return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+                    }
                 }
             }
             return $handler->handle($request);

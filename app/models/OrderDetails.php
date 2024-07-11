@@ -1,6 +1,9 @@
 <?php
+require_once 'utils/functions.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
-class OrderDetails {
+
+class OrderDetails
+{
     public $order_hex_code;
     public $product_id;
     public $quantity;
@@ -27,7 +30,8 @@ class OrderDetails {
     }
 
 
-    public static function GetOrderDetails($order_hex_code) {
+    public static function GetOrderDetails($order_hex_code)
+    {
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT * FROM order_details  WHERE order_hex_code = :order_hex_code");
         $query->bindValue(":order_hex_code", $order_hex_code);
@@ -36,86 +40,100 @@ class OrderDetails {
     }
 
 
-    // puedo agregar un middleware para verificar si realmente esta orden existe y si su estado es en no preparacion
-    static function StartPreppingOrder($order_hex_code, $user_id, $estimated_prep_time){
+    static function StartPreppingOrder($order_hex_code, $product_id, $estimated_prep_time, $user_role, $user_id)
+    {
+        $time = explode(':', $estimated_prep_time);
+        $date = new DateTime();
+        $formated_date = $date->format('Y-m-d H:i:s');
+        $formated_date = new DateTime();
+        $formated_date->setTime($time[0], $time[1], $time[2]);
+        $formated_date->format('Y-m-d H:i:s');
+        $estimated_prep_time = $formated_date->format('Y-m-d H:i:s');
 
-        $flag = false;
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("UPDATE order_details
+        SET status = 1,
+            estimated_prep_time = :estimated_prep_time,
+                prep_by = :prep_by
+        WHERE status = 0 AND
+            product_id IN (
+                SELECT products.id
+                FROM products
+                WHERE products.preparation_area = :user_role
+            ) AND
+            order_details.product_id = :product_id AND
+            order_details.order_hex_code = :order_hex_code");
 
-        $user_role = User::GetUserRoleById($user_id);
-        $prep_areas = Product::GetPreparationArea($order_hex_code);
-        $orderDetails = OrderDetails::GetOrderDetails($order_hex_code);
-    
-        foreach ($orderDetails as $orderDetail) {
-            $product_id = $orderDetail["product_id"];
-            $product_prep_area = $prep_areas[$product_id];
-    
-            if ($product_prep_area == $user_role) {
-                $flag = true;
-                $objDataAccess = DataAccess::GetInstance();
-                $query = $objDataAccess->PrepQuery("UPDATE order_details SET status = :status, estimated_prep_time = :estimated_prep_time, prep_by = :prep_by  WHERE order_hex_code = :order_hex_code AND product_id = :product_id");
-                $query->bindValue(":status", 1 , PDO::PARAM_INT);
-                $query->bindValue(":estimated_prep_time", $estimated_prep_time);
-                $query->bindValue(":prep_by", $user_id, PDO::PARAM_INT);
-                $query->bindValue(":order_hex_code", $order_hex_code);  
-                $query->bindValue(":product_id", $product_id, PDO::PARAM_INT);
-                $query->execute(); 
-            }
-        }
-
-        if (!$flag) {
-            throw new Exception("El usuario no tiene nada para preparar en esta orden");
-        }
-    }
-    
-    // puedo agregar un middleware para verificar si realmente esta orden existe y si su estado es en no preparacion
-    static function EndPreppingOrder($order_hex_code, $user_id, $actual_prep_time){
-
-        $flag = false;
-
-        $user_role = User::GetUserRoleById($user_id);
-        $prep_areas = Product::GetPreparationArea($order_hex_code);
-        $orderDetails = OrderDetails::GetOrderDetails($order_hex_code);
-    
-        foreach ($orderDetails as $orderDetail) {
-            $product_id = $orderDetail['product_id'];
-            $product_prep_area = $prep_areas[$product_id];
-    
-            if ($product_prep_area == $user_role) {
-                $flag = true;
-                $objDataAccess = DataAccess::GetInstance();
-                $query = $objDataAccess->PrepQuery(" UPDATE order_details SET status = :status, actual_prep_time = :actual_prep_time WHERE order_hex_code = :order_hex_code AND product_id = :product_id");
-                $query->bindValue(":status", 2 , PDO::PARAM_INT);
-                $query->bindValue(":actual_prep_time", $actual_prep_time);
-                $query->bindValue(":order_hex_code", $order_hex_code);  
-                $query->bindValue(":product_id", $product_id, PDO::PARAM_INT);
-                $query->execute(); 
-            }
-        }
-
-        if (!$flag) {
-            throw new Exception("El usuario no esta preparando nada de esta orden...");
-        }
+        $query->bindValue(':user_role', $user_role);
+        $query->bindValue(':estimated_prep_time', $estimated_prep_time);
+        $query->bindValue(':product_id', $product_id);
+        $query->bindValue(':order_hex_code', $order_hex_code);
+        $query->bindValue(':prep_by', $user_id);
+        $query->execute();
+        $rowsAffected = $query->rowCount();
+        return $rowsAffected > 0;
     }
 
+    static function EndPreppingOrder($order_hex_code, $product_id, $user_role)
+    {
+        $date = new DateTime();
+        $actual_prep_time = $date->format('Y-m-d H:i:s');
 
-    static function ServerServe($order_hex_code) {
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("UPDATE order_details
+        SET status = 2,
+            actual_prep_time = :actual_prep_time
+        WHERE status = 1 AND
+            product_id IN (
+                SELECT products.id
+                FROM products
+                WHERE products.preparation_area = :user_role
+            ) AND
+            order_details.product_id = :product_id AND
+            order_details.order_hex_code = :order_hex_code");
+
+        $query->bindValue(':user_role', $user_role);
+        $query->bindValue(':actual_prep_time', $actual_prep_time);
+        $query->bindValue(':product_id', $product_id);
+        $query->bindValue(':order_hex_code', $order_hex_code);
+        $query->execute();
+        $rowsAffected = $query->rowCount();
+        return $rowsAffected > 0;
+    }
+
+    static function ReadyToServerServe()
+    {
+        //FALTA ESTA FUNCIONALIDAD PARA MATCHEAR CON UNA QUERY QUE TODOS LOS ELEMENTOS ESTEN LISTOS
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT 
+        COUNT(*) as total_products,
+        SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) as ready_products
+        FROM 
+        order_details
+        WHERE 
+        order_hex_code = :order_hex_code;");
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    static function ServerServe($order_hex_code)
+    {
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT status FROM order_details WHERE order_hex_code = :order_hex_code");
         $query->bindValue(":order_hex_code", $order_hex_code, PDO::PARAM_STR);
         $query->execute();
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
-    
+
         foreach ($results as $row) {
             if ($row['status'] != 2) {
                 throw new Exception(' La orden aún no está lista');
             }
         }
-        
         $query_update = $objDataAccess->PrepQuery("UPDATE order_details SET status = 3 WHERE order_hex_code = :order_hex_code");
         $query_update->bindValue(":order_hex_code", $order_hex_code, PDO::PARAM_STR);
         $query_update->execute();
     }
-    
+
 }
 
 

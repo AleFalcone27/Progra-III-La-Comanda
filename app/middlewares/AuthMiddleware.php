@@ -34,7 +34,9 @@ class AuthMiddleware
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
             }
         } else {
-            throw new Exception("The Token is missing");
+            $response = new Response();
+                $response->getBody()->write(json_encode(["message" => "The token is missing"]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
         }
 
 

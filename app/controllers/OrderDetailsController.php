@@ -1,4 +1,5 @@
 <?php
+use Composer\PHPStan\RuleReasonDataReturnTypeExtension;
 require_once './models/OrderDetails.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
@@ -7,13 +8,12 @@ class OrderDetailsController extends OrderDetails
 {
     /**
      * Gets the body of the request and inserts the order Details in the db.
-     * @return response 
      */
-    public static function AddDetails($request, $response, $args)
+    public static function AddDetails($request, $response, $hex)
     {
         try {    
             $params = $request->getParsedBody();
-            $order_hex_code = $params['hex_code'];
+            $order_hex_code = $hex;
             $details = $params['order_details'];
 
             $order_details = new OrderDetails();
@@ -26,14 +26,10 @@ class OrderDetailsController extends OrderDetails
                     $order_details->AddOrderDetails();
                 }
             }
-
-            $payload = json_encode(array("Message" => "Order details created Sucessfully"));
-
+            return true;
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to add details to an order " . $ex->getMessage()));
+         return false;   
         }
-        $response->getBody()->write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
     }
 
 
@@ -42,16 +38,18 @@ class OrderDetailsController extends OrderDetails
 
             $query_params = $request->getQueryParams();
             $order_hex_code = $query_params['order_hex_code'];
-            $user = $query_params['user_id'];
+            $product_id = $query_params['product_id'];
             $estimated_prep_time = $query_params['estimated_prep_time'];
+            $user_role = GetUserRole($request);
+            $user_id = GetUserID($request);
 
-            OrderDetails::StartPreppingOrder($order_hex_code,$user,$estimated_prep_time);
-
-            $payload = json_encode(array("Message" => "Prepping Order " . $order_hex_code ));
-            
-
+            if(OrderDetails::StartPreppingOrder($order_hex_code,$product_id,$estimated_prep_time, $user_role, $user_id)){
+                $payload = json_encode(array("message" => "Prepping Product " . $product_id . " in order: " . $order_hex_code ));
+            }else{
+                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again" ));
+            }
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to start prepping " . $order_hex_code . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to start prepping " . $order_hex_code . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -62,16 +60,16 @@ class OrderDetailsController extends OrderDetails
 
             $query_params = $request->getQueryParams();
             $order_hex_code = $query_params['order_hex_code'];
-            $user = $query_params['user_id'];
-            $actual_prep_time = $query_params['actual_prep_time'];
+            $product_id = $query_params['product_id'];
+            $user_role = GetUserRole($request);
 
-            OrderDetails::EndPreppingOrder($order_hex_code,$user,$actual_prep_time);
-
-            $payload = json_encode(array("Message" => "End prepping Order " . $order_hex_code ));
-            
-
+            if(OrderDetails::EndPreppingOrder($order_hex_code, $product_id, $user_role)){
+                $payload = json_encode(array("message" => "End Prepping " . $product_id . " in order: " . $order_hex_code ));
+            }else{
+                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again" ));
+            }
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to end prepping " . $order_hex_code . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to end prepping " . $order_hex_code . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -85,124 +83,31 @@ class OrderDetailsController extends OrderDetails
 
             OrderDetails::ServerServe($order_hex_code);
 
-            $payload = json_encode(array("Message" => "Server served Sucessfully: " . $order_hex_code ));
+            $payload = json_encode(array("message" => "Server served Sucessfully: " . $order_hex_code ));
             
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to server order: " . $order_hex_code . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to server order: " . $order_hex_code . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public static function ReadyToServe($request, $response, $args){
+        try {
+            $result = OrderDetails::ReadyToServerServe();
 
+            if($result){
 
-    // /**
-    //  * Gets the requests args and gets an order by their ID from the database.
-    //  * @return response 
-    //  */
-    // public function GetOne($request, $response, $args)
-    // {
-    //     // Buscamos usuario por nombre
-    //     $user = $args['name'];
-    //     $usuario = User::GetOneUser($user);
-    //     $payload = json_encode($usuario);
-    //     $response->getBody()->write($payload);
-    //     return $response->withHeader('Content-Type', 'application/json');
-    // }
+                $payload = json_encode(array("message" => $result ));
+            }else {
 
-    // /**
-    //  * Gets all the Orders from the database.
-    //  * @return response.
-    //  */
-    // public function GetAll($request, $response, $args)
-    // {
-    //     try {
-    //         $list = Order::GetAllOrdes();
-    //         $payload = json_encode(array("Orders:" => $list));
-    //     } catch (Exception $ex) {
-    //         $payload = json_encode(array("Message:" => 'Error trying to get all orders: ' . $ex->getMessage()));
-    //     }
-    //     $response->getBody()->write($payload);
-    //     return $response->withHeader('Content-Type', 'application/json');
-    // }
-
-    // /**
-    //  * Gets the query paarams from de request and modifies a Product by their ID from the database.
-    //  * @return response 
-    //  */
-    // public function UpdateOne($request, $response, $args)
-    // {
-    //     try {
-    //         $query_params = $request->getQueryParams();
-
-    //         $hex_code = $query_params['hex_code'];
-    //         $status = $query_params['status'];
-
-    //         $order = new Order();
-    //         $order->hex_code = $hex_code;
-    //         $order->status = $status;
-
-    //         $order->UpdateStatus();
-
-    //         $payload = json_encode(array("Message" => "Product successfully modified"));
-    //     } catch (Exception $ex) {
-    //         $payload = json_encode(array("Message" => "Error atempting to modify product " . $ex->getMessage()));
-    //     }
-    //     $response->getBody()->write($payload);
-    //     return $response->withHeader('Content-Type', 'application/json');
-    // }
-
-    // /**
-    //  * Gets the body  from de request and changes the products´s status by their ID from the database.
-    //  * @return response 
-    //  */
-    // public function DeleteOne($request, $response, $args)
-    // {
-    //     try {
-    //         $query_params = $request->getQueryParams();
-    //         $id = $query_params['id'];
-
-    //         Product::DeleteProduct($id);
-
-    //         $payload = json_encode(array("message" => "Product deleted succesfully"));
-    //     } catch (Exception $ex) {
-
-    //         $payload = json_encode(array("message" => "Error atempting to delete product " . $ex->getMessage()));
-    //     }
-    //     $response->getBody()->write($payload);
-    //     return $response->withHeader('Content-Type', 'application/json');
-    // }
-
-    // public function ModifyOne($request, $response, $args)
-    // {
-    //     try {
-    //         $query_params = $request->getQueryParams();
-
-    //         $id = $query_params['id'];
-    //         $hex_code = $query_params['hex_code'];
-    //         $table_hex_code = $query_params['table_hex_code'];
-    //         $estimated_prep_time = $query_params['estimated_prep_time'];
-    //         $date = $query_params['date'];
-    //         $status = $query_params['status'];
-    //         $actual_prep_time = $query_params['actual_prep_time'];
+                $payload = json_encode(array("message" => "There are no orders ready to serve"));
+            }
             
-    //         $order = new Order();
-    //         $order->id = $id;
-    //         $order->hex_code = $hex_code;
-    //         $order->table_hex_code = $table_hex_code;
-    //         $order->estimated_prep_time = $estimated_prep_time;
-    //         $order->date = $date;
-    //         $order->status = $status;
-    //         $order->actual_prep_time = $actual_prep_time;
-
-    //         Order::ModifyOrder($order);
-
-    //         $payload = json_encode(array("Message" => "ORder successfully modified"));
-    //     } catch (Exception $ex) {
-    //         $payload = json_encode(array("Message" => "Error atempting to modify order " . $ex->getMessage()));
-    //     }
-    //     $response->getBody()->write($payload);
-    //     return $response->withHeader('Content-Type', 'application/json');
-    // }
-
+        } catch (Exception $ex) {
+            $payload = json_encode(array("message" => "Error atempting to see ready to serve orders: " . $ex->getMessage()));
+        }
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }

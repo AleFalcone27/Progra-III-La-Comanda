@@ -65,6 +65,15 @@ class User
         return $result['role'];
     }
 
+    public static function GetUserNameById($user_id){
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT name FROM users WHERE id = :id");
+        $query->bindValue(':id', $user_id, PDO::PARAM_INT);
+        $query->execute();
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        return $result['role'];
+    }
+
 
     /**
      * Modifies a user by their ID from the database.
@@ -108,7 +117,7 @@ class User
         $user = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($user_pass, $user['password'])) {
-            return JwtAuth::CrearToken([$user['name'],$user['role']]);
+            return JwtAuth::CrearToken([$user['id'],$user['role']]);
         }
         throw new Exception('Credenciales Incorrectas');
     }

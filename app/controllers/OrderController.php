@@ -4,7 +4,7 @@ require_once 'Controllers/OrderDetailsController.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class OrderController extends Product implements IApiUsable
+class OrderController /*extends Product implements IApiUsable*/
 {
     /**
      * Gets the body of the request and inserts a new Order in the db.
@@ -14,22 +14,23 @@ class OrderController extends Product implements IApiUsable
     {
         try {
             $params = $request->getParsedBody();
-            $hex_code = $params['hex_code'];
             $table_hex_code = $params['table_hex_code'];
-            $estimated_prep_time = $params['estimated_prep_time'];
+
+            $length = 5;
+            $bytes = random_bytes(ceil($length / 2));
+            $hex = substr(bin2hex($bytes), 0, $length);
 
             $order = new Order();
-            $order->hex_code = $hex_code;
+            $order->hex_code = $hex;
             $order->table_hex_code = $table_hex_code;
-            $order->estimated_prep_time = $estimated_prep_time;
             $order->AddOrder();
 
-            OrderDetailsController::AddDetails($request,$response,$args);
+            OrderDetailsController::AddDetails($request, $response, $hex);
 
-            $payload = json_encode(array("Message" => "Order created Sucessfully"));
+            $payload = json_encode(array("message" => "Order created Sucessfully"));
 
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to create new Order " . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to create new Order " . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -54,13 +55,19 @@ class OrderController extends Product implements IApiUsable
      * Gets all the Orders from the database.
      * @return response.
      */
-    public function GetAll($request, $response, $args)
+    public function GetOrdersToPrepare($request, $response, $args)
     {
-        try {
-            $list = Order::GetAllOrdes();
-            $payload = json_encode(array("Orders:" => $list));
+        try { 
+            $user_role = GetUserRole($request);
+            $result = Order::GetOrdersToPrepare($user_role);
+
+            if($result){
+                $payload = json_encode(array("Orders:" => $result));
+            } else {
+                $payload = json_encode(array("message:" => "You are lucky!! There are no orders to Prepare"));
+            }
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message:" => 'Error trying to get all orders: ' . $ex->getMessage()));
+            $payload = json_encode(array("message:" => 'Error trying to get orders to Prepare: ' . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -84,9 +91,9 @@ class OrderController extends Product implements IApiUsable
 
             $order->UpdateStatus();
 
-            $payload = json_encode(array("Message" => "Product successfully modified"));
+            $payload = json_encode(array("message" => "Product successfully modified"));
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to modify product " . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to modify product " . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -125,7 +132,7 @@ class OrderController extends Product implements IApiUsable
             $date = $query_params['date'];
             $status = $query_params['status'];
             $actual_prep_time = $query_params['actual_prep_time'];
-            
+
             $order = new Order();
             $order->id = $id;
             $order->hex_code = $hex_code;
@@ -137,12 +144,49 @@ class OrderController extends Product implements IApiUsable
 
             Order::ModifyOrder($order);
 
-            $payload = json_encode(array("Message" => "ORder successfully modified"));
+            $payload = json_encode(array("message" => "ORder successfully modified"));
         } catch (Exception $ex) {
-            $payload = json_encode(array("Message" => "Error atempting to modify order " . $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to modify order " . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    public function SaveOrderImage($request, $response, $args)
+    {
+        $params = $request->getParsedBody();
+        $hex_code = $params['hex_code'];
+        try {
+            $payload = json_encode(array("message" => "Order image succesfully saved"));
+            SaveImage('./OrderImages/2024/', $hex_code);
+
+        } catch (Exception $ex) {
+            $payload = json_encode(array("message" => "There was an error while saving the image ". $ex));
+        }
+        finally {
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+    public static function GetCSVFile($request, $response)
+    {
+        if (Order::ToCSVFile('./csv/order.csv')) {
+            $csv = fopen('./csv/order.csv', 'r');
+            $csvContent = stream_get_contents($csv);
+            fclose($csv);
+            $response->getBody()->write(json_encode(array('message' => 'CSV File Succesfully created')));
+            return $response
+                ->withHeader('Content-Type', 'text/csv')
+                ->withHeader('Content-Disposition', 'attachment; filename="table.csv"')
+                ->withHeader('Content-Length', strlen($csvContent));
+        } else {
+            $payload = json_encode(array('error' => 'Something went wrong while downloading'));
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+
+    
 }
