@@ -130,10 +130,7 @@ class Product
             }
 
             while (($row = fgetcsv($csv)) !== false) {
-                $p = new Product();
-                $p->name = $row[0];
-                $p->price = $row[1];
-                $p->preparation_area = $row[2];
+                $p = new Product($row[0],$row[1],$row[2]);
                 $p->AddProduct();
             }
 
