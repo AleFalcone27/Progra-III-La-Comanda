@@ -22,7 +22,6 @@ class OrderDetailsController
             foreach ($detail as $product_id => $quantity) {
                 for ($i = 0; $i < $quantity; $i++) {
                         $order_details->addProduct($product_id);
-                        $order_details->quantity = 0;
                         $order_details->AddOrderDetails();
                 }
             }
