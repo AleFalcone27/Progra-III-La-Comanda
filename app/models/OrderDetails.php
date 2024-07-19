@@ -16,6 +16,10 @@ class OrderDetails
     2 Lista para entregar
     */
 
+    public function __construct($order_hex_code){
+        $this->order_hex_code = $order_hex_code;
+    }
+
     public function AddOrderDetails()
     {
         $objDataAccess = DataAccess::GetInstance();
