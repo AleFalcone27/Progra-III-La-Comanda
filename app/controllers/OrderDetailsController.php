@@ -1,39 +1,37 @@
 <?php
 use Composer\PHPStan\RuleReasonDataReturnTypeExtension;
+
 require_once './models/OrderDetails.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class OrderDetailsController extends OrderDetails 
+class OrderDetailsController
 {
     /**
      * Gets the body of the request and inserts the order Details in the db.
      */
     public static function AddDetails($request, $response, $hex)
     {
-        try {    
-            $params = $request->getParsedBody();
-            $order_hex_code = $hex;
-            $details = $params['order_details'];
-
-            $order_details = new OrderDetails();
-            $order_details->order_hex_code = $order_hex_code;
-
-            foreach ($details as $detail) {
-                foreach ($detail as $product_id => $quantity) {
-                    $order_details->product_id = $product_id;
-                    $order_details->quantity = $quantity;
-                    $order_details->AddOrderDetails();
+        $params = $request->getParsedBody();
+        $order_hex_code = $hex;
+        $details = $params['order_details'];
+        
+        $order_details = new OrderDetails($order_hex_code);
+        
+        foreach ($details as $detail) {
+            foreach ($detail as $product_id => $quantity) {
+                for ($i = 0; $i < $quantity; $i++) {
+                        $order_details->addProduct($product_id);
+                        $order_details->quantity = 0;
+                        $order_details->AddOrderDetails();
                 }
             }
-            return true;
-        } catch (Exception $ex) {
-         return false;   
         }
     }
 
 
-    public static function StartPrepping($request, $response, $args){
+    public static function StartPrepping($request, $response, $args)
+    {
         try {
 
             $query_params = $request->getQueryParams();
@@ -43,10 +41,10 @@ class OrderDetailsController extends OrderDetails
             $user_role = GetUserRole($request);
             $user_id = GetUserID($request);
 
-            if(OrderDetails::StartPreppingOrder($order_hex_code,$product_id,$estimated_prep_time, $user_role, $user_id)){
-                $payload = json_encode(array("message" => "Prepping Product " . $product_id . " in order: " . $order_hex_code ));
-            }else{
-                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again" ));
+            if (OrderDetails::StartPreppingOrder($order_hex_code, $product_id, $estimated_prep_time, $user_role, $user_id)) {
+                $payload = json_encode(array("message" => "Prepping Product " . $product_id . " in order: " . $order_hex_code));
+            } else {
+                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again"));
             }
         } catch (Exception $ex) {
             $payload = json_encode(array("message" => "Error atempting to start prepping " . $order_hex_code . $ex->getMessage()));
@@ -55,7 +53,8 @@ class OrderDetailsController extends OrderDetails
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public static function EndPrepping($request, $response, $args){
+    public static function EndPrepping($request, $response, $args)
+    {
         try {
 
             $query_params = $request->getQueryParams();
@@ -63,10 +62,10 @@ class OrderDetailsController extends OrderDetails
             $product_id = $query_params['product_id'];
             $user_role = GetUserRole($request);
 
-            if(OrderDetails::EndPreppingOrder($order_hex_code, $product_id, $user_role)){
-                $payload = json_encode(array("message" => "End Prepping " . $product_id . " in order: " . $order_hex_code ));
-            }else{
-                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again" ));
+            if (OrderDetails::EndPreppingOrder($order_hex_code, $product_id, $user_role)) {
+                $payload = json_encode(array("message" => "End Prepping " . $product_id . " in order: " . $order_hex_code));
+            } else {
+                $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again"));
             }
         } catch (Exception $ex) {
             $payload = json_encode(array("message" => "Error atempting to end prepping " . $order_hex_code . $ex->getMessage()));
@@ -75,7 +74,8 @@ class OrderDetailsController extends OrderDetails
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public static function Serve($request, $response, $args){
+    public static function Serve($request, $response, $args)
+    {
         try {
 
             $query_params = $request->getQueryParams();
@@ -83,8 +83,8 @@ class OrderDetailsController extends OrderDetails
 
             OrderDetails::ServerServe($order_hex_code);
 
-            $payload = json_encode(array("message" => "Server served Sucessfully: " . $order_hex_code ));
-            
+            $payload = json_encode(array("message" => "Server served Sucessfully: " . $order_hex_code));
+
         } catch (Exception $ex) {
             $payload = json_encode(array("message" => "Error atempting to server order: " . $order_hex_code . $ex->getMessage()));
         }
@@ -92,18 +92,19 @@ class OrderDetailsController extends OrderDetails
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public static function ReadyToServe($request, $response, $args){
+    public static function ReadyToServe($request, $response, $args)
+    {
         try {
             $result = OrderDetails::ReadyToServerServe();
 
-            if($result){
+            if ($result) {
 
-                $payload = json_encode(array("message" => $result ));
-            }else {
+                $payload = json_encode(array("message" => $result));
+            } else {
 
                 $payload = json_encode(array("message" => "There are no orders ready to serve"));
             }
-            
+
         } catch (Exception $ex) {
             $payload = json_encode(array("message" => "Error atempting to see ready to serve orders: " . $ex->getMessage()));
         }
