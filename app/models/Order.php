@@ -98,20 +98,12 @@ class Order
             $rows = $query->fetchAll(PDO::FETCH_ASSOC);
         if (empty($rows)) {
             throw new Exception('The table is empty or does not exists' );
+        }else{
+            return $rows;
         }
-        $file = fopen($location, 'w');
-        fwrite($file, implode(',', array_keys($rows[0])) . "\n");
-        foreach ($rows as $row) {
-            $escapedRow = array_map(function($field) {
-                return str_replace(['"', "'"], '', $field);
-            }, $row);
-            fwrite($file, implode(',', $escapedRow) . "\n");
-        }
-        fclose($file);
-        return true;
     } catch (Exception $e) {
         echo $e;
-        return false;
+        return array();
     }
     }
 

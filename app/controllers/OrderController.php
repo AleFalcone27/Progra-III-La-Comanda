@@ -4,7 +4,7 @@ require_once 'Controllers/OrderDetailsController.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class OrderController /*extends Product implements IApiUsable*/
+class OrderController 
 {
     /**
      * Gets the body of the request and inserts a new Order in the db.
@@ -57,11 +57,11 @@ class OrderController /*extends Product implements IApiUsable*/
      */
     public function GetOrdersToPrepare($request, $response, $args)
     {
-        try { 
+        try {
             $user_role = GetUserRole($request);
             $result = Order::GetOrdersToPrepare($user_role);
 
-            if($result){
+            if ($result) {
                 $payload = json_encode(array("Orders:" => $result));
             } else {
                 $payload = json_encode(array("message:" => "You are lucky!! There are no orders to Prepare"));
@@ -161,9 +161,8 @@ class OrderController /*extends Product implements IApiUsable*/
             SaveImage('./OrderImages/2024/', $hex_code);
 
         } catch (Exception $ex) {
-            $payload = json_encode(array("message" => "There was an error while saving the image ". $ex));
-        }
-        finally {
+            $payload = json_encode(array("message" => "There was an error while saving the image " . $ex));
+        } finally {
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json');
         }
@@ -171,22 +170,26 @@ class OrderController /*extends Product implements IApiUsable*/
 
     public static function GetCSVFile($request, $response)
     {
-        if (Order::ToCSVFile('./csv/order.csv')) {
-            $csv = fopen('./csv/order.csv', 'r');
-            $csvContent = stream_get_contents($csv);
+        try {
+            $result = Order::ToCSVFile('./csv/order.csv');
+            $file_name = 'orders' . '.csv';
+            header("Content-Type: text/csv");
+            header("Content-Disposition: attachment; filename=$file_name");
+
+            $csv = fopen('php://output', 'w');
+
+            fputcsv($csv, array_keys($result[0]));
+
+            foreach ($result as $order) {
+                fputcsv($csv, $order);
+            }
+
             fclose($csv);
-            $response->getBody()->write(json_encode(array('message' => 'CSV File Succesfully created')));
-            return $response
-                ->withHeader('Content-Type', 'text/csv')
-                ->withHeader('Content-Disposition', 'attachment; filename="table.csv"')
-                ->withHeader('Content-Length', strlen($csvContent));
-        } else {
-            $payload = json_encode(array('error' => 'Something went wrong while downloading'));
-            $response->getBody()->write($payload);
+
+            return $response;
+        } catch (Exception $e) {
+            $response->getBody()->write("Error: " . $e->getMessage());
             return $response->withHeader('Content-Type', 'application/json');
         }
     }
-
-
-    
 }

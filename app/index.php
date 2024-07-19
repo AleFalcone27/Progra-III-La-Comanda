@@ -87,7 +87,7 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
-  $group->get('/', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,2));
+  $group->get('/', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3));
   $group->post('/', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
@@ -96,7 +96,7 @@ $app->group('/orden', function (RouteCollectorProxy $group) {
   $group->get('/ReadyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
   $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
   $group->post('/saveImage', \OrderController::class . ':SaveOrderImage')->add(new AuthMiddleware(1,2));
-  $group->get('/descargar', \OrderController::class . ':GetCSVFile')->add(new AuthMiddleware(1));
+  $group->get('/descargar', \OrderController::class . ':GetCSVFile');
 });
 
 
