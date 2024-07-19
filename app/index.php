@@ -22,18 +22,6 @@ require_once './middlewares/ProductExistsMiddleware.php';
 require_once './middlewares/UploadedFilesMiddleware.php';
 require_once './utils/JwtAuth.php';
 
-/* 
-prep_by?
-
-Tiempo estimado de preparacion 
-tipo
-
-- Cuando el mozo carga la orden debe tener tiempo de demora??
-- Tener listos los puntos de correccion paso a paso 
-- Ver temas de cambio de estados
-
-*/
-
 // Iniciamos la Session
 session_start();
 
