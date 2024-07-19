@@ -20,6 +20,10 @@ class OrderDetails
         $this->order_hex_code = $order_hex_code;
     }
 
+    public function addProduct(){
+        $this->product_id;
+    }
+
     public function AddOrderDetails()
     {
         $objDataAccess = DataAccess::GetInstance();
