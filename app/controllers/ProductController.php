@@ -3,7 +3,7 @@ require_once './models/Product.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class ProductController extends Product implements IApiUsable
+class ProductController
 {
     /**
      * Gets the body of the request and inserts a new Product in the db.
@@ -13,39 +13,16 @@ class ProductController extends Product implements IApiUsable
     {
         try {
             $params = $request->getParsedBody();
-            $name = $params['name'];
-            $price = $params['price'];
-            $preparation_area = $params['preparation_area'];
-
-            if (!in_array($preparation_area, UserController::$VALID_AREA)) {
+            if (!in_array($params['preparation_area'], UserController::$VALID_AREA)) {
                 throw new Exception;
             } else {
-                $product = new Product();
-                $product->name = $name;
-                $product->price = $price;
-                $product->preparation_area = $preparation_area;
+                $product = new Product($params['name'],$params['price'],$params['preparation_area']);
                 $product->AddProduct();
-                
                 $payload = json_encode(array("Message" => "Product created Sucessfully"));
             }
         } catch (Exception $ex) {
             $payload = json_encode(array("Message" => "Error atempting to create new Product ". $ex->getMessage()));
         }
-        $response->getBody()->write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
-    }
-
-
-    /**
-     * Gets the requests args and gets a user by their ID from the database.
-     * @return response 
-     */
-    public function GetOne($request, $response, $args)
-    {
-        // Buscamos usuario por nombre
-        $user = $args['name'];
-        $usuario = User::GetOneUser($user);
-        $payload = json_encode($usuario);
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }
@@ -74,22 +51,9 @@ class ProductController extends Product implements IApiUsable
     {
         try {
             $query_params = $request->getQueryParams();
-
             $id = $query_params['id'];
-            $name = $query_params['name'];
-            $price = $query_params['price'];
-            $preparation_area = $query_params['preparation_area'];
-
-            $date = new DateTime();
-            $formated_date = $date->format('Y-m-d H:i:s');
-            $product = new Product();
-            $product->id = $id;
-            $product->name = $name;
-            $product->price = $price;
-            $product->preparation_area = $preparation_area;
-            $product->updated_at = $formated_date;
-
-            Product::ModifyProduct($product);
+            $product = new Product($query_params['name'],$query_params['price'],$query_params['preparation_area']);
+            Product::ModifyProduct($product, $id);
 
             $payload = json_encode(array("Message" => "Product successfully modified"));
         } catch (Exception $ex) {
@@ -108,9 +72,7 @@ class ProductController extends Product implements IApiUsable
         try {
             $query_params = $request->getQueryParams();
             $id = $query_params['id'];
-
             Product::DeleteProduct($id);
-
             $payload = json_encode(array("message" => "Product deleted succesfully"));
         } catch (Exception $ex) {
 
@@ -125,9 +87,7 @@ class ProductController extends Product implements IApiUsable
         try{
             $args = $request->getParsedBody();
             $file_name = $args['file_name'];
-
             Product::Populate($file_name);
-
             $payload = json_encode(array("message" => "Table Products populated "));
         }
         catch (Exception $ex){
@@ -138,7 +98,7 @@ class ProductController extends Product implements IApiUsable
     }
 
     public static function ProductExistsById($product_id){
-        try{
+        try {
             if(Product::GetProductById($product_id)){
                 return true;
             }else return false; 
@@ -149,9 +109,7 @@ class ProductController extends Product implements IApiUsable
 
     public static function GetProductsCSV($request, $response, $args){
         try{
-
             Product::GetByCSV();
-
             $payload = json_encode(array("message" => "File Created Succesfully"));
         }
         catch (Exception $ex){

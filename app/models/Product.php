@@ -20,6 +20,11 @@ class Product
 
     public $updated_at;
 
+    public function __construct($name,$price,$preparation_area){
+        $this->name = $name;
+        $this->price = $price;
+        $this->preparation_area = $preparation_area;
+    }
 
     /**
      * Inserts a new product in the database.
@@ -57,15 +62,17 @@ class Product
      * Modifies a product by their ID from the database.
      * @param Product $product instance of user with the id to modify.
      */
-    public static function ModifyProduct($product)
+    public static function ModifyProduct($product,$id)
     {
+        $date = new DateTime();
+        $formated_date = $date->format('Y-m-d H:i:s');
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery('UPDATE products SET name = :name, price = :price, preparation_area = :preparation_area, updated_at = :updated_at  WHERE id = :id');
-        $query->bindValue(':id', $product->id, PDO::PARAM_INT);
+        $query->bindValue(':id', $id, PDO::PARAM_INT);
         $query->bindValue(':name', $product->name, PDO::PARAM_STR);
         $query->bindValue(':price', $product->price);
         $query->bindValue(':preparation_area', $product->preparation_area, PDO::PARAM_INT);
-        $query->bindValue(':updated_at', $product->updated_at);
+        $query->bindValue(':updated_at', $formated_date);
         $query->execute();
     }
 
