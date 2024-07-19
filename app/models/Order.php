@@ -40,7 +40,7 @@ class Order
     public static function GetOrdersToPrepare($user_role)
     {
         $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery("SELECT product_id,name,order_hex_code FROM order_details
+        $query = $objDataAccess->PrepQuery("SELECT order_details.id,name,order_hex_code FROM order_details
         JOIN products ON product_id = products.id
         WHERE order_details.status = 0 AND products.preparation_area = :user_role
         ");

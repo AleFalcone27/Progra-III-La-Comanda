@@ -32,7 +32,6 @@ class OrderDetailsController
     public static function StartPrepping($request, $response, $args)
     {
         try {
-
             $query_params = $request->getQueryParams();
             $order_hex_code = $query_params['order_hex_code'];
             $product_id = $query_params['product_id'];

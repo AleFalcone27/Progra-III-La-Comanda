@@ -67,7 +67,7 @@ class OrderDetails
                 FROM products
                 WHERE products.preparation_area = :user_role
             ) AND
-            order_details.product_id = :product_id AND
+            order_details.id = :product_id AND
             order_details.order_hex_code = :order_hex_code");
 
         $query->bindValue(':user_role', $user_role);
