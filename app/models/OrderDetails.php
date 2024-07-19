@@ -15,11 +15,13 @@ class OrderDetails
     2 Lista para entregar
     */
 
-    public function __construct($order_hex_code){
+    public function __construct($order_hex_code)
+    {
         $this->order_hex_code = $order_hex_code;
     }
 
-    public function addProduct($product_id){
+    public function addProduct($product_id)
+    {
         $this->product_id = $product_id;
     }
 
@@ -50,11 +52,12 @@ class OrderDetails
     {
         $time = explode(':', $estimated_prep_time);
         $date = new DateTime();
+
         $formated_date = $date->format('Y-m-d H:i:s');
-        $formated_date = new DateTime();
-        $formated_date->setTime($time[0], $time[1], $time[2]);
-        $formated_date->format('Y-m-d H:i:s');
-        $estimated_prep_time = $formated_date->format('Y-m-d H:i:s');
+        $time_interval = new DateInterval(sprintf('PT%dH%dM', $time[0], $time[1], $time[2]));
+        $date->add($time_interval);
+
+        $estimated_prep_time = $date->format('Y-m-d H:i:s');
 
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("UPDATE order_details
@@ -95,7 +98,7 @@ class OrderDetails
                 FROM products
                 WHERE products.preparation_area = :user_role
             ) AND
-            order_details.product_id = :product_id AND
+            order_details.id = :product_id AND
             order_details.order_hex_code = :order_hex_code");
 
         $query->bindValue(':user_role', $user_role);

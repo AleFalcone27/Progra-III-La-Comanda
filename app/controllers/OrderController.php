@@ -152,22 +152,6 @@ class OrderController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function SaveOrderImage($request, $response, $args)
-    {
-        $params = $request->getParsedBody();
-        $hex_code = $params['hex_code'];
-        try {
-            $payload = json_encode(array("message" => "Order image succesfully saved"));
-            SaveImage('./OrderImages/2024/', $hex_code);
-
-        } catch (Exception $ex) {
-            $payload = json_encode(array("message" => "There was an error while saving the image " . $ex));
-        } finally {
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json');
-        }
-    }
-
     public static function GetCSVFile($request, $response)
     {
         try {
