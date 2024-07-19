@@ -6,19 +6,24 @@ class Table
     public $customer_count;
     public $status;
 
+
+    public function __construct($customer_count, $status = 1){
+        $this->customer_count = $customer_count;
+        $this->status = $status;
+    }
+
     /**
      * Inserts a new table in the database.
      */
     public function AddTable() 
     {
-        $customer_count= 1;
-        $unique_id = uniqid('', true);
-        $hex_code = bin2hex($unique_id);
+        $bytes = random_bytes(ceil(5 / 2));
+        $hex_code = substr(bin2hex($bytes), 0, 5);
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("INSERT INTO tables (hex_code, customer_count, status) VALUES (:hex_code, :customer_count, :status )");
         $query->bindValue(':hex_code', $hex_code, PDO::PARAM_STR );
-        $query->bindValue(':customer_count', $customer_count, PDO::PARAM_INT );
-        $query->bindValue(':status', 1, PDO::PARAM_INT);
+        $query->bindValue(':customer_count', $this->customer_count, PDO::PARAM_INT );
+        $query->bindValue(':status', $this->status, PDO::PARAM_INT);
         $query->execute();
     }
 
@@ -51,11 +56,10 @@ class Table
      * Modifies a table by their ID from the database.
      * @param table $table instance of user with the id to modify.
      */
-    public static function ModifyTable($table)
+    public static function ModifyTable($table,$hex_code)
     {
         $objDataAccess = DataAccess::GetInstance();
-        $query = $objDataAccess->PrepQuery('UPDATE tables SET id = :id, customer_count = :customer_count, status= :status WHERE hex_code = :hex_code');
-        $query->bindValue(':id', $table->id, PDO::PARAM_INT);
+        $query = $objDataAccess->PrepQuery('UPDATE tables SET customer_count = :customer_count, status = :status WHERE hex_code = :hex_code');
         $query->bindValue(':hex_code', $table->hex_code, PDO::PARAM_INT);
         $query->bindValue(':customer_count', $table->customer_count, PDO::PARAM_INT);
         $query->bindValue(':status', $table->status, PDO::PARAM_INT);

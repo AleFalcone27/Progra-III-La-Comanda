@@ -4,7 +4,7 @@ require_once './models/Table.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class TableController extends Table implements IApiUsable
+class TableController
 {
     /**
      * Gets the body of the request and inserts a new Table in the db.
@@ -14,13 +14,8 @@ class TableController extends Table implements IApiUsable
     {
         try {
             $params = $request->getParsedBody();
-            $customer_count = $params['customer_count'];
-
-            $table = new Table();
-            $table->customer_count = $customer_count;
-            $table->status = 1;
+            $table = new Table($params['customer_count']);
             $table->AddTable();
-
             $payload = json_encode(array("Message" => "Table created Sucessfully"));
 
         } catch (Exception $ex) {
@@ -30,20 +25,6 @@ class TableController extends Table implements IApiUsable
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-
-    /**
-     * Gets the requests args and gets a table by their ID from the database.
-     * @return response 
-     */
-    public function GetOne($request, $response, $args)
-    {
-        // Buscamos usuario por nombre
-        $table = $args['hex_code'];
-        $table_coincidence = Table::GetOneTable($table);
-        $payload = json_encode($table_coincidence);
-        $response->getBody()->write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
-    }
 
     /**
      * Gets all the tables from the database.
@@ -68,20 +49,10 @@ class TableController extends Table implements IApiUsable
     public function ModifyOne($request, $response, $args)
     {
         try {
+
             $query_params = $request->getQueryParams();
-
-            $id = $query_params['id'];
-            $customer_count = $query_params['customer_count'];
-            $hex_code = $query_params['hex_code'];
-            $status = $query_params['status'];
-
-            $table = new Table();
-            $table->id = $id;
-            $table->hex_code = $hex_code;
-            $table->customer_count = $customer_count;
-            $table->status = $status;
-
-            Table::ModifyTable($table);
+            $table = new Table($query_params['customer_count'],$query_params['status']);
+            Table::ModifyTable($table,$query_params['hex_code']);
 
             $payload = json_encode(array("Message" => "Table successfully modified"));
         } catch (Exception $ex) {
