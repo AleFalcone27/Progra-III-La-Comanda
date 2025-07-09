@@ -50,11 +50,16 @@ class OrderDetails
 
     static function StartPreppingOrder($order_hex_code, $product_id, $estimated_prep_time, $user_role, $user_id)
     {
-        $time = explode(':', $estimated_prep_time);
         $date = new DateTime();
+        $time = explode(':', $estimated_prep_time);
 
-        $formated_date = $date->format('Y-m-d H:i:s');
-        $time_interval = new DateInterval(sprintf('PT%dH%dM', $time[0], $time[1], $time[2]));
+        // Asegurarse de tener 3 partes: horas, minutos, segundos
+        $hours = isset($time[0]) ? (int) $time[0] : 0;
+        $minutes = isset($time[1]) ? (int) $time[1] : 0;
+        $seconds = isset($time[2]) ? (int) $time[2] : 0;
+
+        $time_interval = new DateInterval(sprintf('PT%dH%dM%dS', $hours, $minutes, $seconds));
+
         $date->add($time_interval);
 
         $estimated_prep_time = $date->format('Y-m-d H:i:s');
