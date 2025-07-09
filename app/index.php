@@ -75,12 +75,12 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
-  $group->get('', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3));
+  $group->get('', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3,4));
   $group->post('', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
-  $group->patch('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3));
-  $group->put('/end', \OrderDetailsController::class . ':EndPrepping')->add(new AuthMiddleware(1,3));
+  $group->patch('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3,4));
+  $group->put('/end', \OrderDetailsController::class . ':EndPrepping')->add(new AuthMiddleware(1,3,4));
   $group->get('/ReadyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
   $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
   $group->post('/saveImage', \OrderController::class . ':SaveOrderImage')->add(new AuthMiddleware(1,2));
