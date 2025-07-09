@@ -54,7 +54,7 @@ class Product
         $objDataAccess = DataAccess::GetInstance();
         $query = $objDataAccess->PrepQuery("SELECT * FROM products");
         $query->execute();
-        return $query->fetchAll(PDO::FETCH_CLASS, 'Product');
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
