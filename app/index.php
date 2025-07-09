@@ -79,7 +79,7 @@ $app->group('/orden', function (RouteCollectorProxy $group) {
   $group->post('', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
-  $group->put('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3));
+  $group->patch('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3));
   $group->put('/end', \OrderDetailsController::class . ':EndPrepping')->add(new AuthMiddleware(1,3));
   $group->get('/ReadyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
   $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
