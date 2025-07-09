@@ -75,8 +75,8 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 
 // Order Routes
 $app->group('/orden', function (RouteCollectorProxy $group) {
-  $group->get('/', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3));
-  $group->post('/', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
+  $group->get('', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3));
+  $group->post('', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
   $group->put('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3));
