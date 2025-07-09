@@ -26,7 +26,7 @@ require_once './utils/JwtAuth.php';
 session_start();
 
 // Load ENV
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeLoad();
 
 // Instantiate App
