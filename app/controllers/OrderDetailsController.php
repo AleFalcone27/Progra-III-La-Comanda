@@ -15,14 +15,14 @@ class OrderDetailsController
         $params = $request->getParsedBody();
         $order_hex_code = $hex;
         $details = $params['order_details'];
-        
+
         $order_details = new OrderDetails($order_hex_code);
-        
+
         foreach ($details as $detail) {
             foreach ($detail as $product_id => $quantity) {
                 for ($i = 0; $i < $quantity; $i++) {
-                        $order_details->addProduct($product_id);
-                        $order_details->AddOrderDetails();
+                    $order_details->addProduct($product_id);
+                    $order_details->AddOrderDetails();
                 }
             }
         }
@@ -32,10 +32,11 @@ class OrderDetailsController
     public static function StartPrepping($request, $response, $args)
     {
         try {
-            $query_params = $request->getQueryParams();
-            $order_hex_code = $query_params['order_hex_code'];
-            $product_id = $query_params['product_id'];
-            $estimated_prep_time = $query_params['estimated_prep_time'];
+            $body = $request->getBody()->getContents();
+            $data = json_decode($body, true);
+            $order_hex_code = $data['order_hex_code'] ?? null;
+            $product_id = $data['product_id'] ?? null;
+            $estimated_prep_time = $data['estimated_prep_time'] ?? null;
             $user_role = GetUserRole($request);
             $user_id = GetUserID($request);
 
@@ -45,7 +46,7 @@ class OrderDetailsController
                 $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again"));
             }
         } catch (Exception $ex) {
-            $payload = json_encode(array("message" => "Error atempting to start prepping " . $order_hex_code .' '. $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to start prepping " . $order_hex_code . ' ' . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
@@ -65,7 +66,7 @@ class OrderDetailsController
                 $payload = json_encode(array("message" => "The product or the order doesn´t exist or they are already being prepared, please check the pendding orders again"));
             }
         } catch (Exception $ex) {
-            $payload = json_encode(array("message" => "Error atempting to end prepping " . $order_hex_code .' '. $ex->getMessage()));
+            $payload = json_encode(array("message" => "Error atempting to end prepping " . $order_hex_code . ' ' . $ex->getMessage()));
         }
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
