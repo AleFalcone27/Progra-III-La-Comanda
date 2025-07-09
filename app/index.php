@@ -55,13 +55,13 @@ $app->group('/users', function (RouteCollectorProxy $group) {
 // Products Routes
 $app->group('/products', function (RouteCollectorProxy $group) {
   $group->get('/all', \ProductController::class . ':GetAll');
+  $group->get('/dowloadProdcutsCSV', \ProductController::class . ':GetProductsCSV');
   $group->get('/{name}', \ProductController::class . ':GetOne');
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
   $group->put('/delete', \ProductController::class . ':DeleteOne');
   $group->post('/loadProductsCSV', \ProductController::class)->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
   $group->post('/createPorducts', \ProductController::class . ':PopulateByCSV');
-  $group->get('/dowloadProdcutsCSV', \ProductController::class . ':GetProductsCSV');
 })->add(new AuthMiddleware(1));
 
 // Table Routes
