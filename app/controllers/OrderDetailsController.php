@@ -52,12 +52,13 @@ class OrderDetailsController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public static function EndPrepping($request, $response, $args)
+    public static function EndPrepping($request, $response)
     {
         try {
-            $query_params = $request->getQueryParams();
-            $order_hex_code = $query_params['order_hex_code'];
-            $product_id = $query_params['id'];
+            $body = $request->getBody()->getContents();
+            $data = json_decode($body, true);
+            $order_hex_code = $data['order_hex_code'] ?? null;
+            $product_id = $data['product_id'] ?? null;
             $user_role = GetUserRole($request);
 
             if (OrderDetails::EndPreppingOrder($order_hex_code, $product_id, $user_role)) {
