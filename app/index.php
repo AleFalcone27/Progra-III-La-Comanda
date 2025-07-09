@@ -44,7 +44,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
 });
 
 // User Routes
-$app->group('/usuarios', function (RouteCollectorProxy $group) {
+$app->group('/users', function (RouteCollectorProxy $group) {
   $group->get('/', \UserController::class . ':GetAll');
   $group->get('/{name}', \UserController::class . ':GetOne');
   $group->post('/delete', \UserController::class . ':DeleteOne');
@@ -53,19 +53,19 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
 
 
 // Products Routes
-$app->group('/productos', function (RouteCollectorProxy $group) {
+$app->group('/products', function (RouteCollectorProxy $group) {
   $group->get('/all', \ProductController::class . ':GetAll');
   $group->get('/{name}', \ProductController::class . ':GetOne');
   $group->post('/', \ProductController::class . ':AddOne');
   $group->put('/mod', \ProductController::class . ':ModifyOne');
   $group->put('/delete', \ProductController::class . ':DeleteOne');
-  $group->post('/cargarcsv', \ProductController::class)->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
-  $group->post('/crearproductos', \ProductController::class . ':PopulateByCSV');
-  $group->get('/obtenerproductos/todos', \ProductController::class . ':GetProductsCSV');
+  $group->post('/loadProductsCSV', \ProductController::class)->add(new UploadedFilesMiddleware('text/cvs/','./UploadedProducts/'));
+  $group->post('/createPorducts', \ProductController::class . ':PopulateByCSV');
+  $group->get('/dowloadProdcutsCSV', \ProductController::class . ':GetProductsCSV');
 })->add(new AuthMiddleware(1));
 
 // Table Routes
-$app->group('/mesas', function (RouteCollectorProxy $group) {
+$app->group('/tables', function (RouteCollectorProxy $group) {
   $group->get('/', \TableController::class . ':GetAll');
   $group->get('/{hex_code}', \TableController::class . ':GetOne');
   $group->post('/', \TableController::class . ':AddOne');
@@ -74,17 +74,17 @@ $app->group('/mesas', function (RouteCollectorProxy $group) {
 })->add(new AuthMiddleware(1,2));
 
 // Order Routes
-$app->group('/orden', function (RouteCollectorProxy $group) {
+$app->group('/order', function (RouteCollectorProxy $group) {
   $group->get('', \OrderController::class . ':GetOrdersToPrepare')->add(new AuthMiddleware(1,3,4));
   $group->post('', \OrderController::class . ':AddOne')->add(new ProductexistsMiddleware());
   $group->put('/update', \OrderController::class . ':UpdateStatus');
   $group->put('/mod', \OrderController::class . ':ModifyOne');
   $group->patch('/start', \OrderDetailsController::class . ':StartPrepping')->add(new AuthMiddleware(1,3,4));
   $group->put('/end', \OrderDetailsController::class . ':EndPrepping')->add(new AuthMiddleware(1,3,4));
-  $group->get('/ReadyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
+  $group->get('/readyToServe', \OrderDetailsController::class . ':ReadyToServe')->add(new AuthMiddleware(1,2));
   $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
   $group->post('/saveImage', \OrderController::class . ':SaveOrderImage')->add(new AuthMiddleware(1,2));
-  $group->get('/descargar', \OrderController::class . ':GetCSVFile');
+  $group->get('/download', \OrderController::class . ':GetCSVFile');
 });
 
 
