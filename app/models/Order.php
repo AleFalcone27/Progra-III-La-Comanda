@@ -107,4 +107,69 @@ class Order
     }
     }
 
+public static function GetOrdersByTableHexCode($hex_code)
+{
+    try {
+        $hex_code = trim(strtolower($hex_code));
+        $objDataAccess = DataAccess::GetInstance();
+        $query = $objDataAccess->PrepQuery("SELECT * FROM orders WHERE table_hex_code = :hex_code");
+        $query->bindParam(":hex_code", $hex_code);
+        $query->execute();
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows)) {
+            throw new Exception("No orders found for this table.");
+        }
+
+        return $rows;
+    } catch (Exception $e) {
+        echo $e->getMessage();
+        return array();
+    }
+}
+
+public static function GetEstimatedPrepTimeGroupedByOrder()
+{
+    try {
+        $objDataAccess = DataAccess::GetInstance();
+
+        $query = $objDataAccess->PrepQuery("
+            SELECT order_hex_code, SUM(estimated_prep_time) AS total_estimated_prep_time
+            FROM order_details
+            GROUP BY order_hex_code
+        ");
+
+        $query->execute();
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows)) {
+            throw new Exception("No orders found.");
+        }
+
+        $result = [];
+
+         foreach ($rows as $row) {
+            $start = new DateTime($row['created_at']);
+            $end = new DateTime($row['estimated_prep_time']);
+
+            // Calcular la diferencia de tiempo
+            $interval = $start->diff($end);
+
+            $hours = $interval->h + $interval->d * 24; // Por si hay días de diferencia
+            $minutes = $interval->i;
+
+            $formattedTime = sprintf("%dh %dm", $hours, $minutes);
+
+            $result[] = [
+                'order_hex_code' => $row['order_hex_code'],
+                'estimated_time_formatted' => $formattedTime,
+            ];
+        }                                                                                                                                                                                     
+        return $result;
+
+    } catch (Exception $e) {
+        echo $e->getMessage();
+        return [];
+    }
+}
 }

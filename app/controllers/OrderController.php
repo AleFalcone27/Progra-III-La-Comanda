@@ -4,7 +4,7 @@ require_once 'Controllers/OrderDetailsController.php';
 require_once './interfaces/IApiUsable.php';
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-class OrderController 
+class OrderController
 {
     /**
      * Gets the body of the request and inserts a new Order in the db.
@@ -176,4 +176,51 @@ class OrderController
             return $response->withHeader('Content-Type', 'application/json');
         }
     }
+
+public static function GetOrdersByTableAndId($hex_code, $order_id = null)
+{
+    try {
+        $hex_code = trim(strtolower($hex_code));
+        $objDataAccess = DataAccess::GetInstance();
+
+        $sql = "SELECT * FROM orders WHERE table_hex_code = :hex_code";
+        
+        $query = $objDataAccess->PrepQuery($sql);
+        $query->bindParam(":hex_code", $hex_code);
+        if (!empty($order_id)) {
+            $query->bindParam(":order_id", $order_id);
+        }
+
+        $query->execute();
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows)) {
+            throw new Exception("No orders found for this table and order ID.");
+        }
+
+        return $rows;
+    } catch (Exception $e) {
+        echo $e->getMessage();
+        return array();
+    }
+}
+
+public static function GetPendingOrders($request, $response, $args)
+{
+    try {
+        $result = Order::GetEstimatedPrepTimeGroupedByOrder();
+
+        if ($result) {
+            $payload = json_encode(["Orders" => $result]);
+        } else {
+            $payload = json_encode(["message" => "There are no pending orders"]);
+        }
+    } catch (Exception $ex) {
+        $payload = json_encode(["message" => 'Error trying to get pending orders: ' . $ex->getMessage()]);
+    }
+
+    $response->getBody()->write($payload);
+    return $response->withHeader('Content-Type', 'application/json');
+}
+
 }
