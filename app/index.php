@@ -85,6 +85,7 @@ $app->group('/order', function (RouteCollectorProxy $group) {
   $group->put('/serve', \OrderDetailsController::class . ':Serve')->add(new AuthMiddleware(1,2));
   $group->post('/saveImage', \OrderController::class . ':SaveOrderImage')->add(new AuthMiddleware(1,2));
   $group->get('/download', \OrderController::class . ':GetCSVFile');
+  $group->get('/myOrder', \OrderController::class . ':GetOrdersForTable');
 });
 
 
